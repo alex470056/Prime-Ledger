@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>PrimeLedger — Personal &amp; Cashbook Accounting Suite</title>
+<style>
+  :root{
+    --bg:#f3f4f6;--surface:#ffffff;--border:#d1d5db;--bdark:#9ca3af;
+    --text:#111827;--muted:#6b7280;--pri:#1b365d;--prih:#132744;
+    --acc:#2563eb;--cr:#15803d;--crbg:#dcfce7;--dr:#b91c1c;--drbg:#fee2e2;
+    --warn:#b45309;--warnbg:#fef3c7;--alt:#f9fafb
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.45;-webkit-text-size-adjust:100%}
+  .topbar{background:var(--pri);color:#fff;padding:11px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0f172a;flex-wrap:wrap;gap:8px}
+  .topbar h1{font-size:18px;font-weight:700;display:inline;margin-right:8px}
+  .topbar small{font-size:12px;color:#cbd5e1}
+  .topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .topbar-tag{font-size:11px;background:rgba(255,255,255,.15);padding:3px 8px;border-radius:3px}
+  .nav-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;position:sticky;top:0;z-index:20}
+  .nav-btn{background:#f3f4f6;border:1px solid var(--border);color:var(--text);padding:7px 10px;font-size:12.5px;font-weight:600;cursor:pointer;border-radius:3px;touch-action:manipulation}
+  .nav-btn:hover{background:#e5e7eb}
+  .nav-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+  .container{max-width:1240px;margin:14px auto;padding:0 12px}
+  .page{display:none}.page.active{display:block}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:14px}
+  .card-title{font-size:15px;font-weight:700;color:var(--pri);padding-bottom:8px;margin-bottom:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin-bottom:14px}
+  .stat-box{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--pri);padding:10px 12px;border-radius:3px}
+  .stat-box.cr{border-left-color:var(--cr)}.stat-box.dr{border-left-color:var(--dr)}.stat-box.cash{border-left-color:#d97706}.stat-box.udhaar{border-left-color:#7c3aed}
+  .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700}
+  .stat-val{font-size:17px;font-weight:700;margin-top:3px}
+  .txt-cr{color:var(--cr)}.txt-dr{color:var(--dr)}.txt-warn{color:var(--warn)}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  @media(max-width:760px){.g2,.g3{grid-template-columns:1fr}}
+  .mode-switch{display:inline-flex;flex-wrap:wrap;border:1px solid var(--bdark);border-radius:3px;overflow:hidden;margin-bottom:12px}
+  .mode-btn{padding:7px 12px;border:none;border-right:1px solid var(--bdark);background:#f3f4f6;color:var(--text);font-size:13px;font-weight:600;cursor:pointer}
+  .mode-btn:last-child{border-right:none}.mode-btn.active{background:var(--pri);color:#fff}
+  .preset-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;align-items:center}
+  .chip{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:4px 9px;border-radius:3px;font-size:12px;font-weight:600;cursor:pointer}
+  .chip:hover{background:#dbeafe}
+  .form-row{margin-bottom:10px}
+  .form-row label{display:block;font-size:12px;font-weight:600;margin-bottom:3px;color:#374151}
+  input[type=text],input[type=number],input[type=date],input[type=password],select,textarea{width:100%;padding:7px 9px;border:1px solid var(--bdark);border-radius:3px;font-size:13px;font-family:inherit;background:#fff;color:var(--text)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc)}
+  .btn{padding:7px 12px;border:1px solid var(--bdark);background:#f3f4f6;color:var(--text);font-size:13px;font-weight:600;border-radius:3px;cursor:pointer;touch-action:manipulation}
+  .btn:hover{background:#e5e7eb}
+  .btn-pri{background:var(--pri);color:#fff;border-color:var(--pri)}.btn-pri:hover{background:var(--prih)}
+  .btn-ok{background:var(--cr);color:#fff;border-color:var(--cr)}
+  .btn-del{background:#fee2e2;color:var(--dr);border-color:#fca5a5}.btn-del:hover{background:#fecaca}
+  .btn-sm{padding:4px 8px;font-size:12px}
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border:1px solid var(--border);padding:6px 7px;text-align:left}
+  th{background:#f1f5f9;font-weight:600;color:#334155;white-space:nowrap}
+  tr:nth-child(even) td{background:var(--alt)}
+  .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .bar-bg{width:100%;background:#e5e7eb;height:9px;border-radius:2px;overflow:hidden}
+  .bar-fill{height:100%;background:var(--pri)}
+  .msg-ok{color:var(--cr);font-size:13px;font-weight:600}
+  .msg-err{color:var(--dr);font-size:13px;font-weight:600}
+  .msg-warn{color:var(--warn);font-size:13px;font-weight:600}
+  .tag-list{list-style:none;margin-top:10px;border:1px solid var(--border);border-radius:3px}
+  .tag-list li{padding:6px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .tag-list li:last-child{border-bottom:none}
+  .toolbar{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:11px;align-items:flex-end}
+  .toolbar>div{min-width:130px;flex:1}
+  .badge{display:inline-block;padding:2px 6px;font-size:11px;border-radius:2px;background:#e2e8f0;color:#1e293b;font-weight:600;white-space:nowrap}
+  .b-cr{background:var(--crbg);color:var(--cr)}.b-dr{background:var(--drbg);color:var(--dr)}.b-tr{background:#e0e7ff;color:#3730a3}.b-ud{background:#f3e8ff;color:#6b21a8}.b-dup{background:var(--warnbg);color:var(--warn);margin-left:4px}
+  .strip{display:flex;flex-wrap:wrap;gap:14px;background:#f8fafc;border:1px solid var(--border);padding:8px 12px;border-radius:3px;margin-bottom:11px;font-size:13px}
+  .upload-bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#f8fafc;border:1px dashed var(--bdark);padding:12px;border-radius:4px;margin-bottom:10px}
+  .chk-lbl{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer}
+  .alert-banner{background:var(--warnbg);border:1px solid #f59e0b;color:#92400e;padding:9px 12px;border-radius:4px;margin-bottom:12px;font-size:13px;display:none;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .pin-overlay{position:fixed;inset:0;background:#0f172a;color:#fff;display:none;align-items:center;justify-content:center;z-index:999;padding:16px}
+  .pin-box{background:#fff;color:var(--text);padding:22px;border-radius:6px;max-width:340px;width:100%;text-align:center}
+  @media print{body{background:#fff;font-size:12px}.topbar,.nav-bar,.no-print{display:none!important}.container{max-width:100%;margin:0;padding:0}.card{border:none;padding:0}.page{display:none!important}#page-statement{display:block!important}th,td{border:1px solid #999;padding:5px 6px}}
+</style>
+</head>
+<body>
+
+<!-- PIN LOCK OVERLAY -->
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+    <h2 style="color:var(--pri);margin-bottom:6px">PrimeLedger Locked</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Apna 4-6 digit Security PIN dalein</p>
+    <input type="password" id="pinUnlockInp" inputmode="numeric" maxlength="6" placeholder="Enter PIN" style="text-align:center;font-size:18px;letter-spacing:4px;margin-bottom:10px">
+    <button type="button" class="btn btn-pri" style="width:100%" onclick="unlockApp()">Unlock Register</button>
+    <div id="pinErr" class="msg-err" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<header class="topbar">
+  <div><h1>PrimeLedger</h1><small>Personal &amp; Cashbook Accounting Suite</small></div>
+  <div class="topbar-right">
+    <span class="topbar-tag">Laptop + Mobile Sync • Excel/CSV • 4GB RAM Safe</span>
+    <button type="button" class="btn btn-sm" style="background:#fff;color:var(--pri);border:none" onclick="switchPage('sync')">Sync Devices</button>
+  </div>
+</header>
+
+<nav class="nav-bar" id="navBar">
+  <button class="nav-btn active" data-page="dashboard">1. Dashboard</button>
+  <button class="nav-btn" data-page="entry">2. New Entry</button>
+  <button class="nav-btn" data-page="import">3. Excel / CSV Import</button>
+  <button class="nav-btn" data-page="all">4. All Entries</button>
+  <button class="nav-btn" data-page="reports">5. Reports &amp; Udhaar</button>
+  <button class="nav-btn" data-page="statement">6. Passbook</button>
+  <button class="nav-btn" data-page="sync">7. Laptop-Mobile Sync</button>
+  <button class="nav-btn" data-page="manage">8. Settings &amp; Backup</button>
+</nav>
+
+<main class="container">
+
+  <div class="alert-banner" id="backupBanner">
+    <span><strong>Backup Reminder:</strong> Aapne kaafi nayi entries add ki hain. Laptop/Mobile par Sync Code ya Backup save kar lein.</span>
+    <div style="display:flex;gap:6px">
+      <button type="button" class="btn btn-pri btn-sm" onclick="switchPage('sync')">Get Sync Code</button>
+      <button type="button" class="btn btn-sm" onclick="dismissBackupAlert()">Dismiss</button>
+    </div>
+  </div>
+
+  <!-- PAGE 1: DASHBOARD -->
+  <section class="page active" id="page-dashboard">
+    <div class="stats-grid">
+      <div class="stat-box cr"><div class="stat-label">Total Aaya (Credit +)</div><div class="stat-val txt-cr" id="dashIn">₹0.00</div></div>
+      <div class="stat-box dr"><div class="stat-label">Total Gaya (Debit -)</div><div class="stat-val txt-dr" id="dashOut">₹0.00</div></div>
+      <div class="stat-box"><div class="stat-label">Net Bachat / Balance</div><div class="stat-val" id="dashNet">₹0.00</div></div>
+      <div class="stat-box cash"><div class="stat-label">Cash Wallet (Jeb)</div><div class="stat-val" id="dashCash">₹0.00</div></div>
+      <div class="stat-box"><div class="stat-label">UPI / Bank Balance</div><div class="stat-val" id="dashBank">₹0.00</div></div>
+      <div class="stat-box udhaar"><div class="stat-label">Pending Udhaar (Net)</div><div class="stat-val" id="dashUdhaar">₹0.00</div></div>
+    </div>
+
+    <div class="card" id="budgetBox" style="display:none;padding:11px 14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:13px"><strong>Is Mahine Ka Kharcha vs Overall Limit</strong><span id="budgetTxt">₹0 / ₹0</span></div>
+      <div class="bar-bg"><div class="bar-fill" id="budgetBar" style="width:0%"></div></div>
+    </div>
+
+    <div class="g2">
+      <div class="card">
+        <div class="card-title">
+          <span>Recent 6 Transactions</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-sm" onclick="openQuickCash()">+ Cash</button>
+            <button class="btn btn-sm" onclick="switchPage('import')">Import Excel/CSV</button>
+            <button class="btn btn-pri btn-sm" onclick="switchPage('entry')">+ New Entry</button>
+          </div>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Date</th><th>Type</th><th>UPI ID / Party</th><th>Mode</th><th class="num">Amount (₹)</th></tr></thead>
+          <tbody id="dashRecent"></tbody>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>Is Mahine Ke Top 5 Bade Kharche</span></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Party / UPI ID</th><th>Category</th><th>Date</th><th class="num">Amount (₹)</th></tr></thead>
+          <tbody id="dashTopExp"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 2: NEW ENTRY (CLEAN DIRECT + QUICK CASH + CONTRA TRANSFER + PRESETS) -->
+  <section class="page" id="page-entry">
+    <div style="max-width:780px;margin:0 auto">
+      <div class="mode-switch">
+        <button type="button" class="mode-btn active" id="mUpiBtn" onclick="setEntryMode('UPI')">UPI / Bank Entry</button>
+        <button type="button" class="mode-btn" id="mCashBtn" onclick="setEntryMode('Cash')">Cash Kharcha (Jeb)</button>
+        <button type="button" class="mode-btn" id="mTrfBtn" onclick="setEntryMode('TRANSFER')">ATM / Wallet Transfer</button>
+      </div>
+
+      <!-- Quick Recurring Presets -->
+      <div class="card" style="padding:11px 14px">
+        <div style="font-size:12px;font-weight:700;color:var(--pri);margin-bottom:6px">1-Click Quick Templates (Rozana Kharch):</div>
+        <div class="preset-bar" id="presetChips"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span id="formTitle">Transaction Details Bharein</span></div>
+        <form id="entryForm">
+          <input type="hidden" id="editId" value="">
+          <div class="g3" id="normalTypeRow">
+            <div class="form-row"><label for="inpType">Transaction Type *</label>
+              <select id="inpType">
+                <option value="debit">Gaya / Kharcha (Debit -)</option>
+                <option value="credit">Aaya / Mila (Credit +)</option>
+              </select>
+            </div>
+            <div class="form-row"><label for="inpAmt">Amount (₹) *</label><input type="number" id="inpAmt" step="0.01" min="0.01" placeholder="e.g. 120" required></div>
+            <div class="form-row"><label for="inpDate">Date *</label><input type="date" id="inpDate" required></div>
+          </div>
+
+          <div class="g2" id="transferRow" style="display:none">
+            <div class="form-row"><label for="trfDir">Transfer Direction *</label>
+              <select id="trfDir">
+                <option value="BANK_TO_CASH">Bank/UPI se Cash Nikala (ATM Withdrawal)</option>
+                <option value="CASH_TO_BANK">Cash Bank/UPI mein Jama Kiya (Cash Deposit)</option>
+              </select>
+            </div>
+            <div class="form-row"><label for="trfNote">ATM / Bank Naam</label><input type="text" id="trfNote" placeholder="e.g. Canara Bank ATM"></div>
+          </div>
+
+          <div class="g2" id="partyModeRow">
+            <div class="form-row"><label for="inpParty">UPI ID / Dukaan / Party Naam *</label><input type="text" id="inpParty" placeholder="e.g. anand@okicici ya Chai / Auto" oninput="autoSuggestCategory(this.value)"></div>
+            <div class="form-row"><label for="inpMode">Payment Mode *</label>
+              <select id="inpMode">
+                <option value="UPI">UPI</option>
+                <option value="Cash">Cash (Jeb)</option>
+                <option value="Bank">Bank Transfer / Card</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="g3">
+            <div class="form-row"><label for="inpCat">Category *</label><select id="inpCat" required></select></div>
+            <div class="form-row"><label for="inpPer">Person (Kiska Hisaab) *</label><select id="inpPer" required></select></div>
+            <div class="form-row"><label for="inpUdhaar">Udhaar Status</label>
+              <select id="inpUdhaar">
+                <option value="NONE">Normal (Clear)</option>
+                <option value="LENT">Udhaar Diya (Lena Hai)</option>
+                <option value="BORROWED">Udhaar Liya (Dena Hai)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row"><label for="inpNote">Extra Note (Optional)</label><input type="text" id="inpNote" placeholder="e.g. Subah ka nasta, Bill payment"></div>
+
+          <div style="margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <button type="submit" class="btn btn-pri" id="saveBtn">Save Entry</button>
+            <button type="button" class="btn" id="cancelEditBtn" style="display:none">Cancel Edit</button>
+            <span class="msg-ok" id="entryToast"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 3: EXCEL (.XLS) & CSV STATEMENT IMPORTER -->
+  <section class="page" id="page-import">
+    <div class="card">
+      <div class="card-title">
+        <span>Bank Excel (.XLS) &amp; CSV Statement Importer (Auto Duplicate Guard)</span>
+        <button type="button" class="btn btn-sm" id="clearImpBtn">Clear Table</button>
+      </div>
+      <div class="upload-bar">
+        <div style="flex:1;min-width:230px">
+          <label for="stmtFileInput" style="display:block;font-size:12px;font-weight:600;margin-bottom:4px">Canara Bank ya Kisi Bhi Bank ki .XLS / .CSV / .TXT File Select Karein</label>
+          <input type="file" id="stmtFileInput" accept=".csv,.xls,.txt,text/csv,application/vnd.ms-excel,text/plain">
+        </div>
+        <label class="chk-lbl"><input type="checkbox" id="autoSaveImpChk"> Auto-Save New Rows (Skip Duplicates)</label>
+      </div>
+
+      <div id="impStatus" style="margin-bottom:10px;min-height:19px"></div>
+
+      <!-- Manual Column Mapper (Auto-opens if an unusual CSV/XLS header is uploaded) -->
+      <div class="card" id="colMapperBox" style="display:none;background:#f8fafc;border-style:dashed">
+        <div style="font-weight:700;color:var(--pri);margin-bottom:6px">Custom Column Mapping (Columns Khud Chunein):</div>
+        <div class="g3">
+          <div class="form-row"><label>Date Column</label><select id="mapDateCol"></select></div>
+          <div class="form-row"><label>Description / Narration Column</label><select id="mapDescCol"></select></div>
+          <div class="form-row"><label>Amount / Debit Column</label><select id="mapAmtCol"></select></div>
+        </div>
+        <div class="g2">
+          <div class="form-row"><label>Credit Column (Optional)</label><select id="mapCrCol"></select></div>
+          <div class="form-row" style="display:flex;align-items:flex-end"><button type="button" class="btn btn-pri" onclick="applyCustomMapping()">Extract With Selected Columns</button></div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+        <div class="mode-switch" style="margin-bottom:0">
+          <button type="button" class="mode-btn active" id="fImpUpiBtn" onclick="setImpFilter('UPI')">Sirf UPI (0)</button>
+          <button type="button" class="mode-btn" id="fImpAllBtn" onclick="setImpFilter('ALL')">All Transactions (0)</button>
+        </div>
+        <button type="button" class="btn btn-pri" onclick="saveImpRows(false)">Save Selected (Skip Duplicates)</button>
+      </div>
+
+      <div class="toolbar">
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">Sabko Category Dein</label><select id="bulkCat"></select></div>
+        <div><button type="button" class="btn" onclick="applyBulkImp('category')">Apply Category</button></div>
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">Sabko Person Dein</label><select id="bulkPer"></select></div>
+        <div><button type="button" class="btn" onclick="applyBulkImp('person')">Apply Person</button></div>
+      </div>
+
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th style="width:30px"><input type="checkbox" id="chkAllImp" checked onchange="toggleAllImp(this.checked)"></th>
+          <th style="width:124px">Date</th>
+          <th style="width:102px">Type</th>
+          <th style="width:84px">Mode</th>
+          <th>UPI ID / Party Name</th>
+          <th style="width:102px">Amount (₹)</th>
+          <th style="width:132px">Category</th>
+          <th style="width:112px">Person</th>
+          <th>Note</th>
+        </tr></thead>
+        <tbody id="impBody"><tr><td colspan="9" style="text-align:center;color:#6b7280">Bank ki .XLS ya .CSV file select karein — har transaction alag row bankar yahan aa jayegi.</td></tr></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- PAGE 4: ALL ENTRIES -->
+  <section class="page" id="page-all">
+    <div class="card">
+      <div class="card-title">
+        <span>Master Transactions Register</span>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button type="button" class="btn btn-sm" onclick="setQuickDate('TODAY')">Today</button>
+          <button type="button" class="btn btn-sm" onclick="setQuickDate('MONTH')">This Month</button>
+          <button type="button" class="btn btn-sm" onclick="setQuickDate('ALL')">All Time</button>
+        </div>
+      </div>
+      <div class="strip">
+        <span><strong>Filtered Aaya (+):</strong> <span class="txt-cr" id="allIn">₹0.00</span></span>
+        <span><strong>Filtered Gaya (-):</strong> <span class="txt-dr" id="allOut">₹0.00</span></span>
+        <span><strong>Net:</strong> <strong id="allNet">₹0.00</strong></span>
+      </div>
+      <div class="toolbar">
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">Search</label><input type="text" id="allSearch" placeholder="UPI ID / Name / Note"></div>
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">Type</label><select id="allType"><option value="ALL">All</option><option value="debit">Gaya (-)</option><option value="credit">Aaya (+)</option><option value="transfer">ATM Transfer</option></select></div>
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">Category</label><select id="allCat"></select></div>
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">Mode</label><select id="allMode"><option value="ALL">All</option><option value="UPI">UPI</option><option value="Cash">Cash</option><option value="Bank">Bank</option></select></div>
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">From</label><input type="date" id="allFrom"></div>
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">To</label><input type="date" id="allTo"></div>
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">Sort</label><select id="allSort"><option value="date_desc">Latest First</option><option value="amt_desc">High to Low</option><option value="amt_asc">Low to High</option></select></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Type</th><th>UPI ID / Party</th><th>Category</th><th>Person</th><th>Mode</th><th>Note</th><th class="num">Amount (₹)</th><th>Action</th></tr></thead>
+        <tbody id="allBody"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- PAGE 5: REPORTS (CATEGORY + PARTY/UPI + MONTHLY + UDHAAR) -->
+  <section class="page" id="page-reports">
+    <div class="mode-switch">
+      <button type="button" class="mode-btn active" id="rTabCat" onclick="setReportTab('cat')">Category &amp; Budget</button>
+      <button type="button" class="mode-btn" id="rTabParty" onclick="setReportTab('party')">Party &amp; UPI Ledger</button>
+      <button type="button" class="mode-btn" id="rTabMonth" onclick="setReportTab('month')">Monthly Comparison</button>
+      <button type="button" class="mode-btn" id="rTabUdhaar" onclick="setReportTab('udhaar')">Udhaar (Len-Den)</button>
+    </div>
+
+    <div id="repCatSec" class="card">
+      <div class="card-title"><span>Category-Wise Kharcha &amp; Budget Tracker</span><strong id="catTot">Total Gaya: ₹0.00</strong></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Category</th><th class="num">Entries</th><th class="num">Gaya (₹)</th><th class="num">Aaya (₹)</th><th class="num">Is Mahine (₹)</th><th class="num">Cat Limit (₹)</th><th style="width:20%">Share / Limit</th></tr></thead>
+        <tbody id="catBody"></tbody>
+      </table></div>
+    </div>
+
+    <div id="repPartySec" style="display:none">
+      <div class="card">
+        <div class="card-title">
+          <span>Kisko Kitna Diya &amp; Kis Se Kitna Aaya (UPI ID / Party Ledger)</span>
+          <div style="min-width:200px"><input type="text" id="partySearch" placeholder="Filter UPI ID or Name..." oninput="renderReports()"></div>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>UPI ID / Party Name</th><th class="num">Txns</th><th class="num">Kitna Diya (₹)</th><th class="num">Kitna Aaya (₹)</th><th class="num">Net Hisaab (₹)</th><th>Last Date</th></tr></thead>
+          <tbody id="partyBody"></tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>Person-Wise Summary</span></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Person</th><th class="num">Entries</th><th class="num">Kitna Diya (₹)</th><th class="num">Kitna Aaya (₹)</th><th class="num">Net Hisaab (₹)</th></tr></thead>
+          <tbody id="perBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div id="repMonthSec" class="card" style="display:none">
+      <div class="card-title"><span>Month-by-Month Income vs Expense Report</span></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Month</th><th class="num">Entries</th><th class="num">Total Aaya (₹)</th><th class="num">Total Gaya (₹)</th><th class="num">Net Bachat (₹)</th><th class="num">Savings %</th></tr></thead>
+        <tbody id="monthBody"></tbody>
+      </table></div>
+    </div>
+
+    <div id="repUdhaarSec" class="card" style="display:none">
+      <div class="card-title"><span>Pending Udhaar (Lena Hai vs Dena Hai)</span></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Status</th><th>Party / Person</th><th>Note</th><th class="num">Amount (₹)</th><th>Action</th></tr></thead>
+        <tbody id="udhaarBody"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- PAGE 6: PASSBOOK STATEMENT -->
+  <section class="page" id="page-statement">
+    <div class="card">
+      <div class="card-title">
+        <div><span>Passbook Account Statement</span><div style="font-size:12px;font-weight:400;color:var(--muted)" id="stmtMeta">PrimeLedger</div></div>
+        <button type="button" class="btn btn-pri no-print" onclick="window.print()">Print / Save PDF</button>
+      </div>
+      <div class="toolbar no-print">
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">From</label><input type="date" id="sFrom"></div>
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">To</label><input type="date" id="sTo"></div>
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">Wallet</label><select id="sMode"><option value="ALL">All (UPI+Bank+Cash)</option><option value="Cash">Sirf Cash</option><option value="DIGITAL">Sirf UPI &amp; Bank</option></select></div>
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">Category</label><select id="sCat"></select></div>
+        <div><label style="font-size:12px;display:block;margin-bottom:3px">Person</label><select id="sPer"></select></div>
+        <div><button type="button" class="btn btn-pri" onclick="renderStatement()">Generate</button></div>
+      </div>
+      <div class="strip">
+        <span><strong>Opening:</strong> <span id="sOpen">₹0.00</span></span>
+        <span><strong>Aaya (Cr):</strong> <span class="txt-cr" id="sCr">₹0.00</span></span>
+        <span><strong>Gaya (Dr):</strong> <span class="txt-dr" id="sDr">₹0.00</span></span>
+        <span><strong>Closing:</strong> <strong id="sClose">₹0.00</strong></span>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Particulars (UPI ID / Party &amp; Note)</th><th>Mode</th><th>Category</th><th>Person</th><th class="num">Aaya/Cr (₹)</th><th class="num">Gaya/Dr (₹)</th><th class="num">Balance (₹)</th></tr></thead>
+        <tbody id="stmtBody"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- PAGE 7: LAPTOP <-> MOBILE SYNC (ZERO DUPLICATE MERGE) -->
+  <section class="page" id="page-sync">
+    <div class="g2">
+      <div class="card">
+        <div class="card-title"><span>Step 1: Is Device Ka Sync Code Bhejein</span></div>
+        <p style="font-size:12.5px;color:var(--muted);margin-bottom:10px">
+          Is code mein aapki saari entries (<strong id="syncCountLbl">0</strong>) safe packed hain. Ise copy karke WhatsApp/Telegram se apne dusre device (Laptop ya Mobile) par bhejein:
+        </p>
+        <textarea id="syncOutBox" rows="5" readonly style="font-family:monospace;font-size:11.5px;background:#f8fafc"></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="btn btn-pri" onclick="copySyncCode()">Copy Sync Code</button>
+          <button type="button" class="btn" onclick="shareSyncCode()">Share (WhatsApp / Mobile)</button>
+        </div>
+        <div id="syncOutMsg" class="msg-ok" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>Step 2: Dusre Device Ka Sync Code Paste Karein</span></div>
+        <p style="font-size:12.5px;color:var(--muted);margin-bottom:10px">
+          Dusre device se mila <strong>PLSYNC:...</strong> code niche paste karke <strong>Sync &amp; Merge</strong> dabayein. <strong>Double data automatic skip hoga — sirf nayi entries hi judengi.</strong>
+        </p>
+        <textarea id="syncInBox" rows="5" placeholder="Yahan PLSYNC:... code paste karein..." style="font-family:monospace;font-size:11.5px"></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="btn btn-ok" onclick="mergeSyncCode()">Sync &amp; Merge Data</button>
+          <button type="button" class="btn" onclick="document.getElementById('syncInBox').value=''">Clear</button>
+        </div>
+        <div id="syncInMsg" style="margin-top:8px;font-weight:600"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 8: SETTINGS, OPENING BALANCE, LIMITS & BACKUP -->
+  <section class="page" id="page-manage">
+    <div class="g2">
+      <div class="card">
+        <div class="card-title"><span>Opening Wallet Balance (Shuruati Balance)</span></div>
+        <div class="g2">
+          <div class="form-row"><label>Cash Wallet Opening (₹)</label><input type="number" id="openCashInp" step="0.01" placeholder="0"></div>
+          <div class="form-row"><label>UPI / Bank Opening (₹)</label><input type="number" id="openBankInp" step="0.01" placeholder="0"></div>
+        </div>
+        <button type="button" class="btn btn-pri" onclick="saveOpeningBal()">Save Opening Balance</button>
+        <span class="msg-ok" id="openBalMsg" style="margin-left:8px"></span>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>Monthly Overall Limit &amp; Security PIN</span></div>
+        <div class="g2">
+          <div class="form-row"><label>Monthly Kharcha Limit (₹)</label><input type="number" id="budgetInp" min="0" step="100" placeholder="e.g. 15000"></div>
+          <div class="form-row"><label>App Lock PIN (4-6 Digit, Blank = Off)</label><input type="password" id="pinSetInp" inputmode="numeric" maxlength="6" placeholder="e.g. 1234"></div>
+        </div>
+        <button type="button" class="btn btn-pri" onclick="saveBudgetAndPin()">Save Limit &amp; PIN</button>
+        <span class="msg-ok" id="budgetMsg" style="margin-left:8px"></span>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="card">
+        <div class="card-title"><span>Manage Categories &amp; Category Limits</span></div>
+        <div class="g2" style="margin-bottom:8px">
+          <input type="text" id="newCat" placeholder="Category name (e.g. Nasta)">
+          <div style="display:flex;gap:6px">
+            <input type="number" id="newCatLim" min="0" step="100" placeholder="Limit ₹ (Opt)">
+            <button type="button" class="btn btn-pri" onclick="addCat()">Add</button>
+          </div>
+        </div>
+        <ul class="tag-list" id="catUl"></ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>Manage Persons &amp; Quick Templates</span></div>
+        <div style="display:flex;gap:8px;margin-bottom:10px"><input type="text" id="newPer" placeholder="Person name (e.g. Khud, Ghar)"><button type="button" class="btn btn-pri" onclick="addPer()">Add</button></div>
+        <ul class="tag-list" id="perUl" style="margin-bottom:14px"></ul>
+
+        <div style="font-size:13px;font-weight:700;color:var(--pri);margin-bottom:6px">Add Quick Template (1-Click Entry):</div>
+        <div class="g3">
+          <input type="text" id="tplName" placeholder="e.g. Chai / Auto">
+          <input type="number" id="tplAmt" step="0.01" placeholder="Amount ₹">
+          <select id="tplMode"><option value="Cash">Cash</option><option value="UPI">UPI</option></select>
+        </div>
+        <div style="margin-top:6px"><button type="button" class="btn btn-pri btn-sm" onclick="addPreset()">Save Template</button></div>
+        <ul class="tag-list" id="tplUl"></ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Export Excel (CSV) &amp; Smart Merge JSON Backup</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <button type="button" class="btn btn-pri" onclick="exportCSV()">Download Excel (.CSV)</button>
+        <button type="button" class="btn" onclick="exportJSON()">Download Backup (.JSON)</button>
+        <button type="button" class="btn btn-del" onclick="clearAllData()">Reset All Data</button>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:10px 0">
+      <div style="max-width:450px">
+        <label for="impFile" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Merge / Restore Backup (.JSON — Duplicates Auto-Skipped)</label>
+        <div style="display:flex;gap:8px"><input type="file" id="impFile" accept=".json"><button type="button" class="btn" onclick="importJSON()">Merge Backup</button></div>
+      </div>
+      <div id="bkMsg" style="margin-top:8px;font-weight:600"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  const K={
+    E:'primeledger_entries_v2',C:'primeledger_cats_v2',CL:'primeledger_catlim_v2',
+    P:'primeledger_persons_v2',B:'primeledger_budget_v2',OB:'primeledger_openbal_v2',
+    T:'primeledger_presets_v2',PIN:'primeledger_pin_v2',CNT:'primeledger_since_bk_v2'
+  };
+  const DEF_C=['Nasta','Miscellaneous','Ghar Ka Kharcha','Travel','Bills & Recharge','Salary / Income'];
+  const DEF_P=['Khud','Ghar','Dost','Office'];
+  const DEF_T=[
+    {name:'Chai / Nasta',amount:20,mode:'Cash',type:'debit',category:'Nasta'},
+    {name:'Auto / Travel',amount:50,mode:'Cash',type:'debit',category:'Travel'}
+  ];
+  const $=id=>document.getElementById(id);
+
+  let entries=[],categories=[],catLimits={},persons=[],budget=0,openBal={cash:0,bank:0},presets=[],appPin='',sinceBk=0;
+  let impRows=[],impFilter='UPI',rawGrid=[],entryMode='UPI';
+
+  function todayISO(){
+    const d=new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function sid(r){
+    const c=String(r||'').replace(/[^a-zA-Z0-9_-]/g,'_');
+    return c||(Date.now()+'_'+Math.floor(Math.random()*9999));
+  }
+  function esc(s){
+    return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function fmt(n){
+    const v=Number(n)||0;
+    return(v<0?'-':'')+'₹'+Math.abs(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+
+  /* STRICT DEDUPLICATION KEY: prevents double entries during CSV import, Sync Code merge, and JSON restore */
+  function entryFingerprint(e){
+    const d=String(e.date||'').trim();
+    const a=(Number(e.amount)||0).toFixed(2);
+    const m=String(e.merchant||'').trim().toLowerCase().replace(/\s+/g,' ');
+    const t=e.type==='credit'?'credit':(e.type==='transfer'?'transfer':'debit');
+    const md=String(e.mode||'UPI').trim().toUpperCase();
+    return d+'|'+a+'|'+t+'|'+md+'|'+m;
+  }
+
+  function mergeEntryList(incomingList){
+    const seenIds=new Set(entries.map(x=>String(x.id)));
+    const seenFp=new Set(entries.map(entryFingerprint));
+    let added=0,skipped=0;
+    incomingList.forEach((raw,idx)=>{
+      if(!raw||!raw.date||!(Number(raw.amount)>0))return;
+      const clean={
+        id:sid(raw.id||(Date.now()+'_'+idx+'_'+Math.floor(Math.random()*9999))),
+        type:raw.type==='credit'?'credit':(raw.type==='transfer'?'transfer':'debit'),
+        amount:Number(raw.amount),
+        date:String(raw.date).trim(),
+        merchant:String(raw.merchant||'Entry').trim(),
+        mode:String(raw.mode||'UPI').trim(),
+        category:String(raw.category||categories[0]||'Miscellaneous').trim(),
+        person:String(raw.person||persons[0]||'Khud').trim(),
+        udhaar:raw.udhaar||'NONE',
+        note:String(raw.note||'').trim()
+      };
+      const fp=entryFingerprint(clean);
+      if(seenIds.has(clean.id)||seenFp.has(fp)){
+        skipped++;
+        return;
+      }
+      seenIds.add(clean.id);
+      seenFp.add(fp);
+      entries.push(clean);
+      added++;
+    });
+    return{added,skipped};
+  }
+
+  function load(){
+    try{
+      const r=localStorage.getItem(K.E)||localStorage.getItem('primeledger_entries_v1');
+      const arr=r?JSON.parse(r):[];
+      entries=[];
+      if(Array.isArray(arr))mergeEntryList(arr);
+    }catch(e){entries=[];}
+    try{const r=localStorage.getItem(K.C)||localStorage.getItem('primeledger_cats_v1');categories=r?JSON.parse(r):DEF_C.slice();if(!Array.isArray(categories)||!categories.length)categories=DEF_C.slice();}catch(e){categories=DEF_C.slice();}
+    try{const r=localStorage.getItem(K.CL);catLimits=r?JSON.parse(r):{};if(!catLimits||typeof catLimits!=='object')catLimits={};}catch(e){catLimits={};}
+    try{const r=localStorage.getItem(K.P)||localStorage.getItem('primeledger_persons_v1');persons=r?JSON.parse(r):DEF_P.slice();if(!Array.isArray(persons)||!persons.length)persons=DEF_P.slice();}catch(e){persons=DEF_P.slice();}
+    try{const r=localStorage.getItem(K.OB);openBal=r?JSON.parse(r):{cash:0,bank:0};}catch(e){openBal={cash:0,bank:0};}
+    try{const r=localStorage.getItem(K.T);presets=r?JSON.parse(r):DEF_T.slice();if(!Array.isArray(presets))presets=DEF_T.slice();}catch(e){presets=DEF_T.slice();}
+    budget=Number(localStorage.getItem(K.B)||localStorage.getItem('primeledger_budget_v1'))||0;
+    appPin=localStorage.getItem(K.PIN)||'';
+    sinceBk=Number(localStorage.getItem(K.CNT))||0;
+  }
+
+  function saveE(incCount){
+    localStorage.setItem(K.E,JSON.stringify(entries));
+    if(incCount){
+      sinceBk+=incCount;
+      localStorage.setItem(K.CNT,String(sinceBk));
+    }
+    checkBackupBanner();
+  }
+  function saveSettings(){
+    localStorage.setItem(K.C,JSON.stringify(categories));
+    localStorage.setItem(K.CL,JSON.stringify(catLimits));
+    localStorage.setItem(K.P,JSON.stringify(persons));
+    localStorage.setItem(K.T,JSON.stringify(presets));
+  }
+
+  function checkBackupBanner(){
+    $('backupBanner').style.display=sinceBk>=25?'flex':'none';
+  }
+  window.dismissBackupAlert=function(){
+    sinceBk=0;localStorage.setItem(K.CNT,'0');$('backupBanner').style.display='none';
+  };
+
+  /* PIN LOCK */
+  window.unlockApp=function(){
+    const v=($('pinUnlockInp').value||'').trim();
+    if(v===appPin){
+      $('pinOverlay').style.display='none';
+      $('pinUnlockInp').value='';
+      $('pinErr').textContent='';
+    }else{
+      $('pinErr').textContent='Galat PIN! Dobara koshish karein.';
+    }
+  };
+
+  function fillDD(){
+    const co=categories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
+    const po=persons.map(p=>'<option value="'+esc(p)+'">'+esc(p)+'</option>').join('');
+    $('inpCat').innerHTML=co;$('inpPer').innerHTML=po;$('bulkCat').innerHTML=co;$('bulkPer').innerHTML=po;
+    $('allCat').innerHTML='<option value="ALL">All Categories</option>'+co;
+    $('sCat').innerHTML='<option value="ALL">All Categories</option>'+co;
+    $('sPer').innerHTML='<option value="ALL">All Persons</option>'+po;
+  }
+
+  function renderPresets(){
+    $('presetChips').innerHTML=presets.length
+      ?presets.map((t,i)=>'<button type="button" class="chip" onclick="applyPreset('+i+')">'+esc(t.name)+' (₹'+t.amount+' • '+esc(t.mode)+')</button>').join('')
+      :'<span style="font-size:12px;color:var(--muted)">Settings tab se apna daily template add karein.</span>';
+  }
+  window.applyPreset=function(idx){
+    const t=presets[idx];if(!t)return;
+    setEntryMode(t.mode==='Cash'?'Cash':'UPI');
+    $('inpType').value=t.type||'debit';
+    $('inpAmt').value=t.amount;
+    $('inpParty').value=t.name;
+    $('inpMode').value=t.mode||'Cash';
+    if(categories.includes(t.category))$('inpCat').value=t.category;
+  };
+
+  window.autoSuggestCategory=function(txt){
+    const s=String(txt||'').toLowerCase();
+    if(!s)return;
+    const rules=[
+      {re:/zomato|swiggy|chai|nasta|cafe|bakery|hotel|food|samosa|milk|dairy|kirana/,cat:'Nasta'},
+      {re:/irctc|uber|ola|rapido|petrol|fuel|bus|train|metro|auto|toll/,cat:'Travel'},
+      {re:/jio|airtel|vi\b|bsnl|electricity|torrent|gas|recharge|wifi|broadband|bill/,cat:'Bills & Recharge'},
+      {re:/salary|stipend|interest|refund|cashback/,cat:'Salary / Income'}
+    ];
+    for(let i=0;i<rules.length;i++){
+      if(rules[i].re.test(s)&&categories.includes(rules[i].cat)){
+        $('inpCat').value=rules[i].cat;
+        break;
+      }
+    }
+  };
+
+  window.setEntryMode=function(m){
+    entryMode=m;
+    ['mUpiBtn','mCashBtn','mTrfBtn'].forEach(id=>$(id).classList.remove('active'));
+    if(m==='TRANSFER'){
+      $('mTrfBtn').classList.add('active');
+      $('normalTypeRow').style.display='none';
+      $('partyModeRow').style.display='none';
+      $('transferRow').style.display='grid';
+      $('inpParty').removeAttribute('required');
+    }else{
+      $('normalTypeRow').style.display='grid';
+      $('partyModeRow').style.display='grid';
+      $('transferRow').style.display='none';
+      $('inpParty').setAttribute('required','required');
+      if(m==='Cash'){$('mCashBtn').classList.add('active');$('inpMode').value='Cash';}
+      else{$('mUpiBtn').classList.add('active');$('inpMode').value='UPI';}
+    }
+  };
+  window.openQuickCash=function(){resetForm();setEntryMode('Cash');switchPage('entry');};
+
+  window.switchPage=function(p){
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('data-page')===p));
+    const el=$('page-'+p);if(el)el.classList.add('active');
+    if(p==='dashboard')renderDash();
+    if(p==='entry')renderPresets();
+    if(p==='all')renderAll();
+    if(p==='reports')renderReports();
+    if(p==='statement')renderStatement();
+    if(p==='sync')prepareSyncPage();
+    if(p==='manage'){
+      renderLists();
+      $('budgetInp').value=budget||'';
+      $('openCashInp').value=openBal.cash||'';
+      $('openBankInp').value=openBal.bank||'';
+      $('pinSetInp').value=appPin||'';
+    }
+  };
+
+  function renderDash(){
+    const mp=todayISO().slice(0,7);
+    let tIn=0,tOut=0,cNet=Number(openBal.cash)||0,bNet=Number(openBal.bank)||0,mOut=0,udNet=0;
+    const monthExpList=[];
+
+    entries.forEach(e=>{
+      const a=Number(e.amount)||0;
+      if(e.type==='transfer'){
+        if(e.mode==='Cash'){cNet+=a;bNet-=a;}
+        else{bNet+=a;cNet-=a;}
+        return;
+      }
+      const cr=e.type==='credit',sg=cr?a:-a;
+      if(cr)tIn+=a;
+      else{
+        tOut+=a;
+        if((e.date||'').startsWith(mp)){mOut+=a;monthExpList.push(e);}
+      }
+      if((e.mode||'UPI')==='Cash')cNet+=sg;else bNet+=sg;
+      if(e.udhaar==='LENT')udNet+=a;
+      if(e.udhaar==='BORROWED')udNet-=a;
+    });
+
+    const net=(Number(openBal.cash)||0)+(Number(openBal.bank)||0)+tIn-tOut;
+    $('dashIn').textContent=fmt(tIn);
+    $('dashOut').textContent=fmt(tOut);
+    $('dashNet').textContent=fmt(net);$('dashNet').className='stat-val '+(net>=0?'txt-cr':'txt-dr');
+    $('dashCash').textContent=fmt(cNet);$('dashCash').className='stat-val '+(cNet>=0?'txt-cr':'txt-dr');
+    $('dashBank').textContent=fmt(bNet);$('dashBank').className='stat-val '+(bNet>=0?'txt-cr':'txt-dr');
+    $('dashUdhaar').textContent=fmt(udNet);$('dashUdhaar').className='stat-val '+(udNet>=0?'txt-cr':'txt-dr');
+
+    if(budget>0){
+      $('budgetBox').style.display='block';
+      const pct=Math.min(100,(mOut/budget)*100);
+      $('budgetBar').style.width=pct.toFixed(1)+'%';
+      $('budgetBar').style.background=mOut>budget?'#b91c1c':(pct>80?'#d97706':'#15803d');
+      $('budgetTxt').textContent=fmt(mOut)+' / '+fmt(budget)+' ('+((mOut/budget)*100).toFixed(0)+'%)';
+    }else $('budgetBox').style.display='none';
+
+    const rec=entries.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||String(b.id).localeCompare(String(a.id))).slice(0,6);
+    $('dashRecent').innerHTML=rec.length?rec.map(r=>{
+      const badge=r.type==='transfer'?'<span class="badge b-tr">Transfer</span>':(r.type==='credit'?'<span class="badge b-cr">Aaya +</span>':'<span class="badge b-dr">Gaya -</span>');
+      const cls=r.type==='transfer'?'':(r.type==='credit'?'txt-cr':'txt-dr');
+      return'<tr><td>'+esc(r.date)+'</td><td>'+badge+'</td><td>'+esc(r.merchant)+'</td><td><span class="badge">'+esc(r.mode)+'</span></td><td class="num '+cls+'"><strong>'+fmt(r.amount)+'</strong></td></tr>';
+    }).join(''):'<tr><td colspan="5" style="text-align:center;color:#6b7280">Abhi koi entry nahi hai.</td></tr>';
+
+    const top5=monthExpList.sort((a,b)=>(b.amount||0)-(a.amount||0)).slice(0,5);
+    $('dashTopExp').innerHTML=top5.length?top5.map(r=>
+      '<tr><td>'+esc(r.merchant)+'</td><td>'+esc(r.category)+'</td><td>'+esc(r.date)+'</td><td class="num txt-dr"><strong>'+fmt(r.amount)+'</strong></td></tr>'
+    ).join(''):'<tr><td colspan="4" style="text-align:center;color:#6b7280">Is mahine abhi koi kharcha nahi hua.</td></tr>';
+  }
+
+  /* ALL ENTRIES + QUICK DATE PRESETS */
+  window.setQuickDate=function(mode){
+    const t=todayISO();
+    if(mode==='TODAY'){$('allFrom').value=t;$('allTo').value=t;}
+    else if(mode==='MONTH'){$('allFrom').value=t.slice(0,8)+'01';$('allTo').value=t;}
+    else{$('allFrom').value='';$('allTo').value='';}
+    renderAll();
+  };
+
+  function renderAll(){
+    const q=($('allSearch').value||'').trim().toLowerCase(),tf=$('allType').value,cf=$('allCat').value,mf=$('allMode').value,sf=$('allSort').value;
+    const fd=$('allFrom').value,td=$('allTo').value;
+    let list=entries.filter(e=>{
+      if(tf!=='ALL'&&e.type!==tf)return false;
+      if(cf!=='ALL'&&e.category!==cf)return false;
+      if(mf!=='ALL'&&(e.mode||'UPI')!==mf)return false;
+      if(fd&&e.date<fd)return false;
+      if(td&&e.date>td)return false;
+      return !q||((e.merchant||'')+' '+(e.note||'')+' '+(e.person||'')).toLowerCase().includes(q);
+    });
+    if(sf==='amt_desc')list.sort((a,b)=>(b.amount||0)-(a.amount||0));
+    else if(sf==='amt_asc')list.sort((a,b)=>(a.amount||0)-(b.amount||0));
+    else list.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||String(b.id).localeCompare(String(a.id)));
+
+    let sIn=0,sOut=0;
+    $('allBody').innerHTML=list.length?list.map(r=>{
+      const a=Number(r.amount)||0;
+      if(r.type==='credit')sIn+=a;else if(r.type==='debit')sOut+=a;
+      const bdg=r.type==='transfer'?'<span class="badge b-tr">Transfer</span>':(r.type==='credit'?'<span class="badge b-cr">Aaya +</span>':'<span class="badge b-dr">Gaya -</span>');
+      const udTag=r.udhaar==='LENT'?' <span class="badge b-ud">Lena Hai</span>':(r.udhaar==='BORROWED'?' <span class="badge b-ud">Dena Hai</span>':'');
+      const cls=r.type==='transfer'?'':(r.type==='credit'?'txt-cr':'txt-dr');
+      return'<tr><td>'+esc(r.date)+'</td><td>'+bdg+udTag+'</td><td>'+esc(r.merchant)+'</td><td>'+esc(r.category)+'</td><td>'+esc(r.person)+'</td><td><span class="badge">'+esc(r.mode)+'</span></td><td>'+esc(r.note||'-')+'</td><td class="num '+cls+'"><strong>'+fmt(a)+'</strong></td><td><button class="btn btn-sm" onclick="editEntry(\''+esc(r.id)+'\')">Edit</button> <button class="btn btn-del btn-sm" onclick="delEntry(\''+esc(r.id)+'\')">Del</button></td></tr>';
+    }).join(''):'<tr><td colspan="9" style="text-align:center;color:#6b7280">Koi matching entry nahi mili.</td></tr>';
+    $('allIn').textContent=fmt(sIn);$('allOut').textContent=fmt(sOut);$('allNet').textContent=fmt(sIn-sOut);
+  }
+
+  /* REPORTS (4 SUB-TABS) */
+  let activeRepTab='cat';
+  window.setReportTab=function(t){
+    activeRepTab=t;
+    ['rTabCat','rTabParty','rTabMonth','rTabUdhaar'].forEach(id=>$(id).classList.remove('active'));
+    $('repCatSec').style.display=t==='cat'?'block':'none';
+    $('repPartySec').style.display=t==='party'?'block':'none';
+    $('repMonthSec').style.display=t==='month'?'block':'none';
+    $('repUdhaarSec').style.display=t==='udhaar'?'block':'none';
+    if(t==='cat')$('rTabCat').classList.add('active');
+    if(t==='party')$('rTabParty').classList.add('active');
+    if(t==='month')$('rTabMonth').classList.add('active');
+    if(t==='udhaar')$('rTabUdhaar').classList.add('active');
+    renderReports();
+  };
+
+  window.renderReports=function(){
+    const mp=todayISO().slice(0,7);
+    if(activeRepTab==='cat'){
+      const m={};let totD=0;
+      entries.forEach(e=>{
+        if(e.type==='transfer')return;
+        const k=(e.category||'Other').trim(),a=Number(e.amount)||0;
+        if(!m[k])m[k]={c:0,d:0,r:0,md:0};m[k].c++;
+        if(e.type==='credit')m[k].r+=a;
+        else{m[k].d+=a;totD+=a;if((e.date||'').startsWith(mp))m[k].md+=a;}
+      });
+      const rows=Object.keys(m).map(k=>({n:k,...m[k]})).sort((a,b)=>b.d-a.d||b.r-a.r);
+      $('catTot').textContent='Total Gaya: '+fmt(totD);
+      $('catBody').innerHTML=rows.length?rows.map(x=>{
+        const lim=Number(catLimits[x.n])||0;
+        const pct=lim>0?Math.min(100,(x.md/lim)*100):(totD>0?(x.d/totD)*100:0);
+        const col=lim>0&&x.md>lim?'#b91c1c':'#1b365d';
+        return'<tr><td><strong>'+esc(x.n)+'</strong></td><td class="num">'+x.c+'</td><td class="num txt-dr">'+fmt(x.d)+'</td><td class="num txt-cr">'+fmt(x.r)+'</td><td class="num">'+fmt(x.md)+'</td><td class="num">'+(lim>0?fmt(lim):'-')+'</td><td><div class="bar-bg"><div class="bar-fill" style="width:'+pct.toFixed(1)+'%;background:'+col+'"></div></div></td></tr>';
+      }).join(''):'<tr><td colspan="7" style="text-align:center;color:#6b7280">Abhi koi data nahi hai.</td></tr>';
+    }
+    if(activeRepTab==='party'){
+      const q=($('partySearch').value||'').trim().toLowerCase(),pm={},um={};
+      entries.forEach(e=>{
+        if(e.type==='transfer')return;
+        const a=Number(e.amount)||0,cr=e.type==='credit',raw=(e.merchant||'Unknown').trim(),pk=raw.toLowerCase();
+        if(!pm[pk])pm[pk]={n:raw,c:0,d:0,r:0,ld:e.date||''};
+        pm[pk].c++;if(cr)pm[pk].r+=a;else pm[pk].d+=a;if((e.date||'')>pm[pk].ld)pm[pk].ld=e.date;
+        const uk=(e.person||'Other').trim();
+        if(!um[uk])um[uk]={n:uk,c:0,d:0,r:0};um[uk].c++;if(cr)um[uk].r+=a;else um[uk].d+=a;
+      });
+      const pr=Object.values(pm).filter(x=>!q||x.n.toLowerCase().includes(q)).sort((a,b)=>(b.d+b.r)-(a.d+a.r));
+      $('partyBody').innerHTML=pr.length?pr.map(x=>{const net=x.r-x.d;return'<tr><td><strong>'+esc(x.n)+'</strong></td><td class="num">'+x.c+'</td><td class="num txt-dr">'+fmt(x.d)+'</td><td class="num txt-cr">'+fmt(x.r)+'</td><td class="num '+(net>=0?'txt-cr':'txt-dr')+'"><strong>'+fmt(net)+'</strong></td><td>'+esc(x.ld)+'</td></tr>';}).join(''):'<tr><td colspan="6" style="text-align:center;color:#6b7280">Koi party nahi mili.</td></tr>';
+      const ur=Object.values(um).sort((a,b)=>(b.d+b.r)-(a.d+a.r));
+      $('perBody').innerHTML=ur.length?ur.map(x=>{const net=x.r-x.d;return'<tr><td><strong>'+esc(x.n)+'</strong></td><td class="num">'+x.c+'</td><td class="num txt-dr">'+fmt(x.d)+'</td><td class="num txt-cr">'+fmt(x.r)+'</td><td class="num '+(net>=0?'txt-cr':'txt-dr')+'"><strong>'+fmt(net)+'</strong></td></tr>';}).join(''):'<tr><td colspan="5" style="text-align:center;color:#6b7280">Koi data nahi hai.</td></tr>';
+    }
+    if(activeRepTab==='month'){
+      const mm={};
+      entries.forEach(e=>{
+        if(e.type==='transfer')return;
+        const k=(e.date||'Unknown').slice(0,7),a=Number(e.amount)||0;
+        if(!mm[k])mm[k]={m:k,c:0,i:0,o:0};mm[k].c++;
+        if(e.type==='credit')mm[k].i+=a;else mm[k].o+=a;
+      });
+      const rows=Object.values(mm).sort((a,b)=>b.m.localeCompare(a.m));
+      $('monthBody').innerHTML=rows.length?rows.map(x=>{
+        const net=x.i-x.o,sp=x.i>0?((net/x.i)*100).toFixed(1)+'%':'-';
+        return'<tr><td><strong>'+esc(x.m)+'</strong></td><td class="num">'+x.c+'</td><td class="num txt-cr">'+fmt(x.i)+'</td><td class="num txt-dr">'+fmt(x.o)+'</td><td class="num '+(net>=0?'txt-cr':'txt-dr')+'"><strong>'+fmt(net)+'</strong></td><td class="num">'+sp+'</td></tr>';
+      }).join(''):'<tr><td colspan="6" style="text-align:center;color:#6b7280">Abhi koi monthly data nahi hai.</td></tr>';
+    }
+    if(activeRepTab==='udhaar'){
+      const uList=entries.filter(e=>e.udhaar==='LENT'||e.udhaar==='BORROWED').sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+      $('udhaarBody').innerHTML=uList.length?uList.map(r=>{
+        const isLent=r.udhaar==='LENT';
+        return'<tr><td>'+esc(r.date)+'</td><td><span class="badge b-ud">'+(isLent?'Lena Hai (Lent)':'Dena Hai (Borrowed)')+'</span></td><td><strong>'+esc(r.merchant)+'</strong> ('+esc(r.person)+')</td><td>'+esc(r.note||'-')+'</td><td class="num '+(isLent?'txt-cr':'txt-dr')+'"><strong>'+fmt(r.amount)+'</strong></td><td><button class="btn btn-ok btn-sm" onclick="settleUdhaar(\''+esc(r.id)+'\')">Mark Settled</button></td></tr>';
+      }).join(''):'<tr><td colspan="6" style="text-align:center;color:#6b7280">Koi pending udhaar nahi hai.</td></tr>';
+    }
+  };
+
+  window.settleUdhaar=function(id){
+    const idx=entries.findIndex(x=>String(x.id)===String(id));
+    if(idx===-1)return;
+    entries[idx].udhaar='NONE';
+    entries[idx].note=(entries[idx].note?entries[idx].note+' | ':'')+'Settled on '+todayISO();
+    saveE(0);renderReports();renderDash();
+  };
+
+  /* PASSBOOK STATEMENT */
+  window.renderStatement=function(){
+    const fd=$('sFrom').value,td=$('sTo').value,mf=$('sMode').value,cf=$('sCat').value,pf=$('sPer').value;
+    let op=0;
+    if(mf==='Cash')op=Number(openBal.cash)||0;
+    else if(mf==='DIGITAL')op=Number(openBal.bank)||0;
+    else op=(Number(openBal.cash)||0)+(Number(openBal.bank)||0);
+
+    let crT=0,drT=0;const list=[];
+    entries.forEach(e=>{
+      const m=e.mode||'UPI';
+      let sg=0;
+      if(e.type==='transfer'){
+        if(mf==='Cash')sg=(m==='Cash'?Number(e.amount):-(Number(e.amount)));
+        else if(mf==='DIGITAL')sg=(m!=='Cash'?Number(e.amount):-(Number(e.amount)));
+        else return;
+      }else{
+        if(mf==='Cash'&&m!=='Cash')return;
+        if(mf==='DIGITAL'&&m==='Cash')return;
+        if(cf!=='ALL'&&e.category!==cf)return;
+        if(pf!=='ALL'&&e.person!==pf)return;
+        sg=e.type==='credit'?Number(e.amount):-(Number(e.amount));
+      }
+      if(fd&&e.date<fd){op+=sg;return;}
+      if(td&&e.date>td)return;
+      list.push({...e,_sg:sg});
+    });
+    list.sort((a,b)=>(a.date||'').localeCompare(b.date||'')||String(a.id).localeCompare(String(b.id)));
+    let run=op,rows=[];
+    rows.push('<tr style="background:#f1f5f9"><td>'+esc(fd||'Start')+'</td><td colspan="4"><em>Opening Balance</em></td><td class="num">-</td><td class="num">-</td><td class="num"><strong>'+fmt(op)+'</strong></td></tr>');
+    if(!list.length)rows.push('<tr><td colspan="8" style="text-align:center;color:#6b7280">Is period mein koi entry nahi mili.</td></tr>');
+    else list.forEach(r=>{
+      const sg=r._sg,a=Math.abs(sg),isCr=sg>=0;
+      if(isCr){crT+=a;run+=a;}else{drT+=a;run-=a;}
+      const part=esc(r.merchant)+(r.note?' <span style="color:#6b7280">('+esc(r.note)+')</span>':'');
+      rows.push('<tr><td>'+esc(r.date)+'</td><td>'+part+'</td><td>'+esc(r.mode)+'</td><td>'+esc(r.category)+'</td><td>'+esc(r.person)+'</td><td class="num txt-cr">'+(isCr?fmt(a):'-')+'</td><td class="num txt-dr">'+(!isCr?fmt(a):'-')+'</td><td class="num"><strong>'+fmt(run)+'</strong></td></tr>');
+    });
+    $('stmtBody').innerHTML=rows.join('');$('sOpen').textContent=fmt(op);$('sCr').textContent=fmt(crT);$('sDr').textContent=fmt(drT);$('sClose').textContent=fmt(run);
+    $('stmtMeta').textContent='Period: '+(fd||'Start')+' to '+(td||'Today')+' | Wallet: '+mf;
+  };
+
+  /* ============== LAPTOP <-> MOBILE SYNC ENGINE (ZERO DUPLICATE MERGE) ============== */
+  function encodeUtf8Base64(str){
+    const bytes=new TextEncoder().encode(str);
+    let bin='';
+    for(let i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+  function decodeUtf8Base64(b64){
+    const bin=atob(b64);
+    const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  function prepareSyncPage(){
+    $('syncCountLbl').textContent=String(entries.length);
+    const payload={
+      v:2,
+      e:entries,
+      c:categories,
+      cl:catLimits,
+      p:persons,
+      b:budget,
+      ob:openBal,
+      t:presets
+    };
+    const code='PLSYNC:'+encodeUtf8Base64(JSON.stringify(payload));
+    $('syncOutBox').value=code;
+    $('syncOutMsg').textContent='';
+  }
+
+  window.copySyncCode=function(){
+    const box=$('syncOutBox');
+    box.select();
+    box.setSelectionRange(0,999999);
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(box.value).then(()=>{
+        $('syncOutMsg').textContent='Sync Code copy ho gaya! Ab dusre device par paste karein.';
+      }).catch(()=>{
+        document.execCommand('copy');
+        $('syncOutMsg').textContent='Sync Code copy ho gaya!';
+      });
+    }else{
+      document.execCommand('copy');
+      $('syncOutMsg').textContent='Sync Code copy ho gaya!';
+    }
+  };
+
+  window.shareSyncCode=function(){
+    const code=$('syncOutBox').value;
+    if(navigator.share){
+      navigator.share({title:'PrimeLedger Sync Code',text:code}).catch(()=>{});
+    }else{
+      copySyncCode();
+    }
+  };
+
+  window.mergeSyncCode=function(){
+    const raw=($('syncInBox').value||'').trim();
+    const msg=$('syncInMsg');
+    if(!raw){msg.className='msg-err';msg.textContent='Pehle dusre device ka PLSYNC code paste karein.';return;}
+    try{
+      const b64=raw.startsWith('PLSYNC:')?raw.slice(7).trim():raw;
+      const obj=JSON.parse(decodeUtf8Base64(b64));
+      if(!obj||!Array.isArray(obj.e))throw new Error('Invalid');
+      const res=mergeEntryList(obj.e);
+      if(Array.isArray(obj.c))obj.c.forEach(c=>{if(!categories.includes(c))categories.push(c);});
+      if(Array.isArray(obj.p))obj.p.forEach(p=>{if(!persons.includes(p))persons.push(p);});
+      if(obj.cl&&typeof obj.cl==='object')catLimits={...obj.cl,...catLimits};
+      if(!budget&&obj.b){budget=Number(obj.b)||0;localStorage.setItem(K.B,String(budget));}
+      saveE(0);saveSettings();fillDD();prepareSyncPage();
+      msg.className='msg-ok';
+      msg.textContent='Sync Complete! '+res.added+' nayi entries jud gayi ('+res.skipped+' duplicate entries skip ki gayi).';
+      $('syncInBox').value='';
+    }catch(err){
+      msg.className='msg-err';
+      msg.textContent='Error: Poora sahi PLSYNC code paste karein (beech se kata hua nahi).';
+    }
+  };
+
+  /* ============== EXCEL (.XLS) & CSV IMPORTER (ZERO DUPLICATES) ============== */
+  function normDate(s){
+    const mo={jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+    let str=String(s||'').trim();
+    // Strip trailing timestamp like "24/11/2026 14:30:00"
+    str=str.replace(/\s+\d{1,2}:\d{2}(:\d{2})?(\s*[AP]M)?$/i,'').trim();
+    let m;
+    if((m=str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/)))return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+    if((m=str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/)))return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+    if((m=str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})$/)))return'20'+m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+    if((m=str.match(/^(\d{1,2})[\s\-\/]([A-Za-z]{3})[a-z]*[\s\-\/,]+(\d{2,4})$/))){
+      const mm=mo[m[2].toLowerCase()];if(mm)return(m[3].length===2?'20'+m[3]:m[3])+'-'+mm+'-'+m[1].padStart(2,'0');
+    }
+    if((m=str.match(/^([A-Za-z]{3})[a-z]*[\s\-]+(\d{1,2}),?\s*(\d{4})$/))){
+      const mm=mo[m[1].toLowerCase()];if(mm)return m[3]+'-'+mm+'-'+m[2].padStart(2,'0');
+    }
+    return null;
+  }
+
+  function detectMode(txt){
+    if(/\b(UPI|VPA|GPAY|GOOGLE\s*PAY|PHONEPE|PAYTM|BHIM|YBL|OKAXIS|OKICICI|OKHDFCBANK|OKSBI|IBL|AXL|CNRB)\b|@[a-z]{2,}/i.test(txt))return'UPI';
+    if(/\b(ATM|CASH|WDL|WITHDRAWAL\s*BY\s*CASH|SELF\s*CASH|CASH\s*DEPOSIT)\b/i.test(txt))return'Cash';
+    return'Bank';
+  }
+
+  function cleanParty(txt,mode){
+    if(/\bUPI\//i.test(txt)){
+      const parts=txt.split('/').map(s=>s.trim()).filter(Boolean);
+      const vpa=parts.find(p=>/^[a-zA-Z0-9.\-_]{2,}@[a-zA-Z0-9.\-_]{2,}$/.test(p));
+      const namePart=parts.find(p=>
+        !/^(UPI|DR|CR|P2M|P2P|IMPS|NEFT|RTGS|CNRB|SBIN|HDFC|ICIC|UTIB|KKBK|BARB|PUNB|YESB|AIRP|PYTM)$/i.test(p)&&
+        !/^\d+$/.test(p)&&!p.includes('@')&&/[A-Za-z]{2,}/.test(p)&&p.length<=36
+      );
+      if(namePart&&vpa){
+        if(/^(q\d+|paytmqr|bharatpe|gpay-)/i.test(vpa))return namePart;
+        return namePart+' ('+vpa+')';
+      }
+      if(vpa)return vpa;
+      if(namePart)return namePart;
+    }
+    const upi=txt.match(/\b([a-zA-Z0-9.\-_]{2,}@[a-zA-Z0-9.\-_]{2,})\b/);
+    if(upi)return upi[1];
+    let m=txt.match(/(?:Paid to|Received from|Transfer to|Transfer from)\s+([A-Za-z0-9\s.&'_-]{2,36})/i);
+    if(m)return m[1].replace(/\b(Transaction|UTR|Paid|Debit|Credit)\b.*$/i,'').trim();
+    const cleaned=txt
+      .replace(/\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/g,' ')
+      .replace(/(?:₹|Rs\.?|INR)\s*\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?\b|\b\d{1,3}(?:,\d{2,3})*\.\d{2}\b/gi,' ')
+      .replace(/\b\d{8,}\b/g,' ')
+      .replace(/\b(DR|CR|DEBIT|CREDIT|UPI|IMPS|NEFT|RTGS|TO|BY|TRANSFER|REF|UTR|NO|MOB)\b/gi,' ')
+      .replace(/[\/|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,38);
+    return cleaned||(mode==='Cash'?'Cash / ATM':'Bank Transaction');
+  }
+
+  function guessCategory(txt){
+    const s=String(txt||'').toLowerCase();
+    if(/zomato|swiggy|chai|nasta|cafe|bakery|hotel|food|samosa|milk|kirana/.test(s)&&categories.includes('Nasta'))return'Nasta';
+    if(/irctc|uber|ola|rapido|petrol|fuel|bus|train|metro|auto|toll/.test(s)&&categories.includes('Travel'))return'Travel';
+    if(/jio|airtel|vi\b|bsnl|electricity|torrent|gas|recharge|wifi|bill/.test(s)&&categories.includes('Bills & Recharge'))return'Bills & Recharge';
+    if(/salary|stipend|interest|refund|cashback/.test(s)&&categories.includes('Salary / Income'))return'Salary / Income';
+    return categories[0]||'Miscellaneous';
+  }
+
+  function isDup(d,a,p,t,md){
+    const fp=entryFingerprint({date:d,amount:a,merchant:p,type:t,mode:md});
+    return entries.some(e=>entryFingerprint(e)===fp);
+  }
+
+  function buildRowsFromGrid(grid,forcedCols){
+    let hIdx=-1,iDate=-1,iDesc=-1,iDr=-1,iCr=-1,iAmt=-1,iType=-1;
+    if(forcedCols){
+      hIdx=forcedCols.hIdx;iDate=forcedCols.iDate;iDesc=forcedCols.iDesc;
+      iDr=forcedCols.iDr;iCr=forcedCols.iCr;iAmt=forcedCols.iAmt;
+    }else{
+      for(let i=0;i<Math.min(grid.length,40);i++){
+        const c=grid[i].map(x=>String(x||'').toLowerCase().trim());
+        const d=c.findIndex(x=>/date/.test(x));
+        const n=c.findIndex(x=>/narr|desc|partic|remark|detail|merchant|name/.test(x));
+        if(d!==-1&&(n!==-1||c.length>=3)){
+          hIdx=i;iDate=d;iDesc=n!==-1?n:(d===0?1:0);
+          iDr=c.findIndex(x=>/debit|withdraw/.test(x));
+          iCr=c.findIndex(x=>/credit|deposit/.test(x));
+          iAmt=c.findIndex(x=>/amount|amt/.test(x));
+          iType=c.findIndex(x=>/type|dr\/cr|indicator/.test(x));
+          break;
+        }
+      }
+    }
+    if(hIdx===-1)return{ok:false,rows:[]};
+    const out=[],dPer=persons[0]||'Khud';
+    const seenBatch=new Set();
+
+    for(let i=hIdx+1;i<grid.length;i++){
+      const c=grid[i];if(!c||!c[iDate])continue;
+      const dISO=normDate(c[iDate]);if(!dISO)continue;
+      const desc=String(c[iDesc]||'Bank Entry').replace(/\s+/g,' ').trim();
+      const num=v=>parseFloat(String(v||'').replace(/[^0-9.\-]/g,''))||0;
+      let amt=0,type='debit';
+
+      if(iDr!==-1&&num(c[iDr])>0){amt=num(c[iDr]);type='debit';}
+      else if(iCr!==-1&&num(c[iCr])>0){amt=num(c[iCr]);type='credit';}
+      else if(iAmt!==-1&&num(c[iAmt])!==0){
+        const v=num(c[iAmt]);amt=Math.abs(v);
+        const tCol=iType!==-1?String(c[iType]||'').toLowerCase():'';
+        if(/\b(cr|credit)\b/.test(tCol)||/\bUPI\/CR\//i.test(desc)||(v>0&&!/\b(dr|debit)\b/.test(tCol)&&/cr|credit|recv|deposit|refund/i.test(desc)))type='credit';
+      }
+      if(/\bUPI\/DR\//i.test(desc))type='debit';
+      if(/\bUPI\/CR\//i.test(desc))type='credit';
+      if(amt<=0)continue;
+
+      const mode=detectMode(desc);
+      const party=cleanParty(desc,mode);
+      const dup=isDup(dISO,amt,party,type,mode);
+      const batchKey=dISO+'|'+amt.toFixed(2)+'|'+type+'|'+party.toLowerCase();
+      const isBatchDup=seenBatch.has(batchKey);
+      seenBatch.add(batchKey);
+
+      out.push({
+        checked:!dup&&!isBatchDup,
+        isDup:dup||isBatchDup,
+        date:dISO,type,mode,merchant:party,amount:amt,
+        category:guessCategory(desc),person:dPer,note:desc.slice(0,75)
+      });
+    }
+    return{ok:true,rows:out};
+  }
+
+  function parseFileToGrid(text){
+    const trimmed=String(text||'').replace(/^\uFEFF/,'').trim();
+    if(/<table|<tr|<td/i.test(trimmed)){
+      const doc=new DOMParser().parseFromString(trimmed,'text/html');
+      const grid=[];
+      doc.querySelectorAll('tr').forEach(tr=>{
+        const cells=Array.from(tr.querySelectorAll('th,td')).map(td=>td.textContent.replace(/\s+/g,' ').trim());
+        if(cells.some(Boolean))grid.push(cells);
+      });
+      if(grid.length)return grid;
+    }
+    const lines=trimmed.split(/\r?\n/).filter(l=>l.trim());
+    if(!lines.length)return[];
+    const sample=lines.slice(0,15).join('\n');
+    const sep=(sample.match(/\t/g)||[]).length>(sample.match(/,/g)||[]).length?'\t':((sample.match(/;/g)||[]).length>(sample.match(/,/g)||[]).length?';':',');
+    return lines.map(l=>{
+      const cols=[];let cur='',q=false;
+      for(let i=0;i<l.length;i++){
+        const ch=l[i];
+        if(ch==='"')q=!q;
+        else if(ch===sep&&!q){cols.push(cur.trim());cur='';}
+        else cur+=ch;
+      }
+      cols.push(cur.trim());
+      return cols;
+    });
+  }
+
+  function openColumnMapper(grid){
+    const hdr=grid[0]||[];
+    const opts=hdr.map((h,i)=>'<option value="'+i+'">Col '+(i+1)+': '+esc(String(h).slice(0,25))+'</option>').join('');
+    $('mapDateCol').innerHTML=opts;
+    $('mapDescCol').innerHTML=opts;
+    $('mapAmtCol').innerHTML=opts;
+    $('mapCrCol').innerHTML='<option value="-1">-- None --</option>'+opts;
+    if(hdr.length>1)$('mapDescCol').value='1';
+    if(hdr.length>2)$('mapAmtCol').value='2';
+    $('colMapperBox').style.display='block';
+  }
+
+  window.applyCustomMapping=function(){
+    if(!rawGrid.length)return;
+    const res=buildRowsFromGrid(rawGrid,{
+      hIdx:0,
+      iDate:Number($('mapDateCol').value),
+      iDesc:Number($('mapDescCol').value),
+      iDr:Number($('mapAmtCol').value),
+      iCr:Number($('mapCrCol').value),
+      iAmt:Number($('mapAmtCol').value)
+    });
+    impRows=res.rows;
+    $('colMapperBox').style.display='none';
+    finishImportScan();
+  };
+
+  function finishImportScan(){
+    const upiCnt=impRows.filter(r=>r.mode==='UPI').length;
+    impFilter=upiCnt>0?'UPI':'ALL';
+    renderImpTable();
+    const st=$('impStatus');
+    if(!impRows.length){
+      st.className='msg-err';st.textContent='File mein valid transaction rows nahi mili.';return;
+    }
+    if($('autoSaveImpChk').checked){
+      saveImpRows(true);
+    }else{
+      const newCnt=impRows.filter(r=>!r.isDup).length;
+      st.className='msg-ok';
+      st.textContent='Scan Done: '+impRows.length+' rows mili ('+newCnt+' nayi, '+(impRows.length-newCnt)+' duplicate marked).';
+    }
+  }
+
+  function getVisibleImpItems(){
+    return impRows.map((r,i)=>({r,i})).filter(x=>impFilter==='ALL'||x.r.mode==='UPI');
+  }
+
+  function renderImpTable(){
+    const upiCnt=impRows.filter(r=>r.mode==='UPI').length;
+    $('fImpUpiBtn').textContent='Sirf UPI ('+upiCnt+')';
+    $('fImpAllBtn').textContent='All Transactions ('+impRows.length+')';
+    $('fImpUpiBtn').classList.toggle('active',impFilter==='UPI');
+    $('fImpAllBtn').classList.toggle('active',impFilter==='ALL');
+
+    const vis=getVisibleImpItems(),tb=$('impBody');
+    $('chkAllImp').checked=vis.length>0&&vis.every(x=>x.r.checked);
+    if(!vis.length){
+      tb.innerHTML='<tr><td colspan="9" style="text-align:center;color:#6b7280">'+(impRows.length?'Is filter mein koi UPI entry nahi hai — "All Transactions" par click karein.':'Koi statement load nahi hui hai.')+'</td></tr>';
+      return;
+    }
+    const co=categories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
+    const po=persons.map(p=>'<option value="'+esc(p)+'">'+esc(p)+'</option>').join('');
+    tb.innerHTML=vis.map(({r,i})=>
+      '<tr>'+
+        '<td><input type="checkbox" '+(r.checked?'checked':'')+' onchange="updImp('+i+',\'checked\',this.checked)"></td>'+
+        '<td><input type="date" value="'+esc(r.date)+'" onchange="updImp('+i+',\'date\',this.value)"></td>'+
+        '<td><select id="it_'+i+'" onchange="updImp('+i+',\'type\',this.value)"><option value="debit">Gaya (-)</option><option value="credit">Aaya (+)</option></select></td>'+
+        '<td><select id="im_'+i+'" onchange="updImp('+i+',\'mode\',this.value)"><option value="UPI">UPI</option><option value="Cash">Cash</option><option value="Bank">Bank</option></select></td>'+
+        '<td><input type="text" value="'+esc(r.merchant)+'" onchange="updImp('+i+',\'merchant\',this.value)">'+(r.isDup?'<span class="badge b-dup">Duplicate</span>':'')+'</td>'+
+        '<td><input type="number" step="0.01" value="'+Number(r.amount).toFixed(2)+'" onchange="updImp('+i+',\'amount\',parseFloat(this.value)||0)"></td>'+
+        '<td><select id="ic_'+i+'" onchange="updImp('+i+',\'category\',this.value)">'+co+'</select></td>'+
+        '<td><select id="ip_'+i+'" onchange="updImp('+i+',\'person\',this.value)">'+po+'</select></td>'+
+        '<td><input type="text" value="'+esc(r.note)+'" onchange="updImp('+i+',\'note\',this.value)"></td>'+
+      '</tr>'
+    ).join('');
+    vis.forEach(({r,i})=>{$('it_'+i).value=r.type;$('im_'+i).value=r.mode;$('ic_'+i).value=r.category;$('ip_'+i).value=r.person;});
+  }
+
+  window.setImpFilter=f=>{impFilter=f;renderImpTable();};
+  window.updImp=(i,f,v)=>{if(impRows[i])impRows[i][f]=v;};
+  window.toggleAllImp=ch=>{getVisibleImpItems().forEach(({r})=>{r.checked=ch;});renderImpTable();};
+  window.applyBulkImp=f=>{
+    const v=f==='category'?$('bulkCat').value:$('bulkPer').value;
+    getVisibleImpItems().forEach(({r})=>{r[f]=v;});renderImpTable();
+  };
+
+  window.saveImpRows=function(isAuto){
+    const vis=getVisibleImpItems().map(x=>x.r);
+    const sel=vis.filter(r=>r.checked&&Number(r.amount)>0&&r.date&&r.merchant.trim());
+    if(!sel.length){if(!isAuto)alert('Save karne ke liye kam se kam 1 valid row select karein.');return;}
+    const res=mergeEntryList(sel);
+    saveE(res.added);
+    const savedSet=new Set(sel);
+    impRows=impRows.filter(r=>!savedSet.has(r));
+    renderImpTable();
+    $('impStatus').className='msg-ok';
+    $('impStatus').textContent=(isAuto?'Auto-Saved: ':'Saved: ')+res.added+' nayi entries jud gayi ('+res.skipped+' duplicate skip hui).';
+  };
+
+  /* ============== SETTINGS, LISTS & BACKUP ============== */
+  function renderLists(){
+    $('catUl').innerHTML=categories.map((c,i)=>{
+      const lim=Number(catLimits[c])||0;
+      return'<li><span><strong>'+esc(c)+'</strong>'+(lim>0?' <span class="badge">Limit: '+fmt(lim)+'</span>':'')+'</span><button class="btn btn-del btn-sm" onclick="remCat('+i+')">Remove</button></li>';
+    }).join('');
+    $('perUl').innerHTML=persons.map((p,i)=>'<li><span>'+esc(p)+'</span><button class="btn btn-del btn-sm" onclick="remPer('+i+')">Remove</button></li>').join('');
+    $('tplUl').innerHTML=presets.map((t,i)=>'<li><span>'+esc(t.name)+' — '+fmt(t.amount)+' ('+esc(t.mode)+')</span><button class="btn btn-del btn-sm" onclick="remPreset('+i+')">Remove</button></li>').join('');
+  }
+
+  window.saveOpeningBal=function(){
+    openBal={cash:Number($('openCashInp').value)||0,bank:Number($('openBankInp').value)||0};
+    localStorage.setItem(K.OB,JSON.stringify(openBal));
+    $('openBalMsg').textContent='Opening Balance Saved!';
+    setTimeout(()=>$('openBalMsg').textContent='',2200);
+  };
+
+  window.saveBudgetAndPin=function(){
+    budget=Math.max(0,Number($('budgetInp').value)||0);
+    localStorage.setItem(K.B,String(budget));
+    const p=($('pinSetInp').value||'').trim();
+    if(p&&!/^\d{4,6}$/.test(p)){alert('PIN sirf 4 se 6 digits ka hona chahiye.');return;}
+    appPin=p;
+    localStorage.setItem(K.PIN,appPin);
+    $('budgetMsg').textContent='Limit & PIN Saved!';
+    setTimeout(()=>$('budgetMsg').textContent='',2200);
+  };
+
+  window.addCat=function(){
+    const v=($('newCat').value||'').trim(),lim=Math.max(0,Number($('newCatLim').value)||0);
+    if(!v)return;
+    if(!categories.some(c=>c.toLowerCase()===v.toLowerCase()))categories.push(v);
+    if(lim>0)catLimits[v]=lim;
+    saveSettings();fillDD();renderLists();$('newCat').value='';$('newCatLim').value='';
+  };
+  window.remCat=i=>{if(categories.length<2)return;delete catLimits[categories[i]];categories.splice(i,1);saveSettings();fillDD();renderLists();};
+
+  window.addPer=function(){
+    const v=($('newPer').value||'').trim();
+    if(!v||persons.some(p=>p.toLowerCase()===v.toLowerCase()))return;
+    persons.push(v);saveSettings();fillDD();renderLists();$('newPer').value='';
+  };
+  window.remPer=i=>{if(persons.length<2)return;persons.splice(i,1);saveSettings();fillDD();renderLists();};
+
+  window.addPreset=function(){
+    const n=($('tplName').value||'').trim(),a=parseFloat($('tplAmt').value),m=$('tplMode').value;
+    if(!n||!(a>0))return;
+    presets.push({name:n,amount:a,mode:m,type:'debit',category:guessCategory(n)});
+    saveSettings();renderLists();$('tplName').value='';$('tplAmt').value='';
+  };
+  window.remPreset=i=>{presets.splice(i,1);saveSettings();renderLists();};
+
+  function resetForm(){
+    fillDD();$('editId').value='';$('inpType').value='debit';$('inpAmt').value='';$('inpParty').value='';$('inpNote').value='';
+    $('inpUdhaar').value='NONE';$('inpDate').value=todayISO();$('trfNote').value='';
+    $('formTitle').textContent='Transaction Details Bharein';$('saveBtn').textContent='Save Entry';$('cancelEditBtn').style.display='none';
+  }
+
+  window.editEntry=function(id){
+    const f=entries.find(e=>String(e.id)===String(id));if(!f)return;fillDD();
+    if(f.category&&!categories.includes(f.category))$('inpCat').insertAdjacentHTML('beforeend','<option value="'+esc(f.category)+'">'+esc(f.category)+'</option>');
+    if(f.person&&!persons.includes(f.person))$('inpPer').insertAdjacentHTML('beforeend','<option value="'+esc(f.person)+'">'+esc(f.person)+'</option>');
+    $('editId').value=f.id;$('inpAmt').value=f.amount;$('inpDate').value=f.date;
+    $('inpCat').value=f.category;$('inpPer').value=f.person;$('inpUdhaar').value=f.udhaar||'NONE';$('inpNote').value=f.note||'';
+    if(f.type==='transfer'){
+      setEntryMode('TRANSFER');
+      $('trfDir').value=f.mode==='Cash'?'BANK_TO_CASH':'CASH_TO_BANK';
+      $('trfNote').value=f.merchant||'';
+    }else{
+      setEntryMode(f.mode==='Cash'?'Cash':'UPI');
+      $('inpType').value=f.type;$('inpParty').value=f.merchant;$('inpMode').value=f.mode;
+    }
+    $('formTitle').textContent='Edit Transaction';$('saveBtn').textContent='Update Entry';$('cancelEditBtn').style.display='inline-block';
+    switchPage('entry');
+  };
+
+  window.delEntry=function(id){
+    if(!confirm('Is entry ko delete karein?'))return;
+    entries=entries.filter(e=>String(e.id)!==String(id));
+    saveE(0);renderAll();renderDash();
+  };
+
+  function triggerDl(blob,name){
+    const u=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(u),1000);
+  }
+  window.exportCSV=function(){
+    if(!entries.length){alert('Koi entry nahi hai.');return;}
+    const rows=[['Date','Type','UPI ID / Party','Category','Person','Mode','Udhaar','Aaya (INR)','Gaya (INR)','Note'].join(',')];
+    entries.forEach(r=>{
+      const cr=r.type==='credit',dr=r.type==='debit',a=Number(r.amount||0).toFixed(2);
+      rows.push([r.date,r.type,r.merchant,r.category,r.person,r.mode,r.udhaar||'NONE',cr?a:'0.00',dr?a:'0.00',r.note||''].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(','));
+    });
+    triggerDl(new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8;'}),'PrimeLedger_'+todayISO()+'.csv');
+  };
+  window.exportJSON=function(){
+    sinceBk=0;localStorage.setItem(K.CNT,'0');checkBackupBanner();
+    triggerDl(new Blob([JSON.stringify({app:'PrimeLedger',budget,openBal,catLimits,categories,persons,presets,entries},null,2)],{type:'application/json'}),'PrimeLedger_Backup_'+todayISO()+'.json');
+  };
+  window.importJSON=function(){
+    const f=$('impFile').files&&$('impFile').files[0];if(!f){alert('.json file select karein.');return;}
+    const rd=new FileReader();
+    rd.onload=e=>{
+      try{
+        const p=JSON.parse(e.target.result);if(!p||!Array.isArray(p.entries))throw 0;
+        const res=mergeEntryList(p.entries);
+        if(Array.isArray(p.categories))p.categories.forEach(c=>{if(!categories.includes(c))categories.push(c);});
+        if(Array.isArray(p.persons))p.persons.forEach(x=>{if(!persons.includes(x))persons.push(x);});
+        saveE(0);saveSettings();fillDD();renderDash();
+        $('bkMsg').className='msg-ok';$('bkMsg').textContent='Merge Complete: '+res.added+' nayi entries jud gayi ('+res.skipped+' duplicates skip).';
+        $('impFile').value='';
+      }catch(err){$('bkMsg').className='msg-err';$('bkMsg').textContent='Valid JSON backup file select karein.';}
+    };
+    rd.readAsText(f);
+  };
+  window.clearAllData=function(){
+    if(!confirm('Saara data permanently delete ho jayega. Sure?'))return;
+    entries=[];saveE(0);renderDash();$('bkMsg').className='msg-err';$('bkMsg').textContent='Data clear ho gaya.';
+  };
+
+  /* ============== EVENT LISTENERS ============== */
+  $('navBar').addEventListener('click',e=>{if(e.target.classList.contains('nav-btn'))switchPage(e.target.getAttribute('data-page'));});
+  $('cancelEditBtn').addEventListener('click',()=>{resetForm();setEntryMode('UPI');});
+  $('clearImpBtn').addEventListener('click',()=>{$('stmtFileInput').value='';impRows=[];rawGrid=[];$('colMapperBox').style.display='none';renderImpTable();$('impStatus').textContent='';});
+
+  $('stmtFileInput').addEventListener('change',async e=>{
+    const f=e.target.files&&e.target.files[0];if(!f)return;
+    const st=$('impStatus');st.className='msg-warn';st.textContent='Excel / CSV file padhi ja rahi hai...';
+    $('colMapperBox').style.display='none';
+    try{
+      const txt=await f.text();
+      rawGrid=parseFileToGrid(txt);
+      if(!rawGrid.length){st.className='msg-err';st.textContent='File khali hai ya readable format mein nahi hai.';return;}
+      const res=buildRowsFromGrid(rawGrid,null);
+      if(!res.ok){
+        impRows=[];renderImpTable();
+        openColumnMapper(rawGrid);
+        st.className='msg-warn';st.textContent='Columns auto-detect nahi hue — niche diye dropdown se Date aur Amount column chunein.';
+        return;
+      }
+      impRows=res.rows;
+      finishImportScan();
+    }catch(err){
+      st.className='msg-err';st.textContent='File read karne mein error aaya — valid .CSV ya .XLS select karein.';
+    }
+  });
+
+  $('entryForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    const amount=parseFloat($('inpAmt').value),date=$('inpDate').value;
+    const category=$('inpCat').value,person=$('inpPer').value,udhaar=$('inpUdhaar').value;
+    const note=($('inpNote').value||'').trim(),eid=$('editId').value;
+    if(!(amount>0)||!date)return;
+
+    let type='debit',merchant='',mode='UPI';
+    if(entryMode==='TRANSFER'){
+      type='transfer';
+      const dir=$('trfDir').value;
+      mode=dir==='BANK_TO_CASH'?'Cash':'Bank';
+      merchant=($('trfNote').value||'').trim()||(dir==='BANK_TO_CASH'?'ATM Cash Withdrawal':'Bank Cash Deposit');
+    }else{
+      type=$('inpType').value==='credit'?'credit':'debit';
+      merchant=($('inpParty').value||'').trim();
+      mode=$('inpMode').value||'UPI';
+      if(!merchant)return;
+    }
+
+    if(eid){
+      const idx=entries.findIndex(x=>String(x.id)===String(eid));
+      if(idx!==-1)entries[idx]={id:eid,type,amount,date,merchant,mode,category,person,udhaar,note};
+    }else{
+      entries.push({id:Date.now()+'_'+Math.floor(Math.random()*9999),type,amount,date,merchant,mode,category,person,udhaar,note});
+    }
+
+    const keepMode=entryMode;
+    saveE(eid?0:1);
+    resetForm();
+    if(!eid)setEntryMode(keepMode);
+    $('entryToast').textContent=eid?'Entry Update Ho Gayi!':'Entry Save Ho Gayi!';
+    setTimeout(()=>$('entryToast').textContent='',2000);
+  });
+
+  ['allSearch','allType','allCat','allMode','allFrom','allTo','allSort'].forEach(id=>$(id).addEventListener(id==='allSearch'?'input':'change',renderAll));
+
+  /* ============== INIT APP ============== */
+  load();fillDD();renderPresets();checkBackupBanner();
+  if(appPin)$('pinOverlay').style.display='flex';
+  $('inpDate').value=todayISO();
+  $('sFrom').value=todayISO().slice(0,8)+'01';
+  $('sTo').value=todayISO();
+  renderDash();
+})();
+</script>
+</body>
+</html>
