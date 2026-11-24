@@ -17,7 +17,7 @@
   .topbar h1{font-size:18px;font-weight:700;display:inline;margin-right:8px}
   .topbar small{font-size:12px;color:#cbd5e1}
   .topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .topbar-tag{font-size:11px;background:rgba(255,255,255,.15);padding:3px 8px;border-radius:3px}
+  .status-pill{font-size:11.5px;background:rgba(255,255,255,.16);padding:4px 9px;border-radius:3px;font-weight:600}
   .nav-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;position:sticky;top:0;z-index:20}
   .nav-btn{background:#f3f4f6;border:1px solid var(--border);color:var(--text);padding:7px 10px;font-size:12.5px;font-weight:600;cursor:pointer;border-radius:3px;touch-action:manipulation}
   .nav-btn:hover{background:#e5e7eb}
@@ -34,17 +34,20 @@
   .txt-cr{color:var(--cr)}.txt-dr{color:var(--dr)}.txt-warn{color:var(--warn)}
   .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-  @media(max-width:760px){.g2,.g3{grid-template-columns:1fr}}
+  @media(max-width:780px){.g2,.g3{grid-template-columns:1fr}}
   .mode-switch{display:inline-flex;flex-wrap:wrap;border:1px solid var(--bdark);border-radius:3px;overflow:hidden;margin-bottom:12px}
   .mode-btn{padding:7px 12px;border:none;border-right:1px solid var(--bdark);background:#f3f4f6;color:var(--text);font-size:13px;font-weight:600;cursor:pointer}
   .mode-btn:last-child{border-right:none}.mode-btn.active{background:var(--pri);color:#fff}
-  .preset-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;align-items:center}
+  .preset-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
   .chip{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:4px 9px;border-radius:3px;font-size:12px;font-weight:600;cursor:pointer}
   .chip:hover{background:#dbeafe}
   .form-row{margin-bottom:10px}
   .form-row label{display:block;font-size:12px;font-weight:600;margin-bottom:3px;color:#374151}
-  input[type=text],input[type=number],input[type=date],input[type=password],select,textarea{width:100%;padding:7px 9px;border:1px solid var(--bdark);border-radius:3px;font-size:13px;font-family:inherit;background:#fff;color:var(--text)}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc)}
+  .inline-group{display:flex;gap:5px;align-items:center}
+  .inline-group select{flex:1}
+  .quick-add-box{background:#f8fafc;border:1px dashed var(--bdark);padding:8px;border-radius:3px;margin-top:5px;display:none}
+  input[type=text],input[type=number],input[type=date],input[type=password],select{width:100%;padding:7px 9px;border:1px solid var(--bdark);border-radius:3px;font-size:13px;font-family:inherit;background:#fff;color:var(--text)}
+  input:focus,select:focus{outline:none;border-color:var(--acc)}
   .btn{padding:7px 12px;border:1px solid var(--bdark);background:#f3f4f6;color:var(--text);font-size:13px;font-weight:600;border-radius:3px;cursor:pointer;touch-action:manipulation}
   .btn:hover{background:#e5e7eb}
   .btn-pri{background:var(--pri);color:#fff;border-color:var(--pri)}.btn-pri:hover{background:var(--prih)}
@@ -72,9 +75,11 @@
   .strip{display:flex;flex-wrap:wrap;gap:14px;background:#f8fafc;border:1px solid var(--border);padding:8px 12px;border-radius:3px;margin-bottom:11px;font-size:13px}
   .upload-bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#f8fafc;border:1px dashed var(--bdark);padding:12px;border-radius:4px;margin-bottom:10px}
   .chk-lbl{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer}
-  .alert-banner{background:var(--warnbg);border:1px solid #f59e0b;color:#92400e;padding:9px 12px;border-radius:4px;margin-bottom:12px;font-size:13px;display:none;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .banner{background:var(--warnbg);border:1px solid #f59e0b;color:#92400e;padding:9px 12px;border-radius:4px;margin-bottom:12px;font-size:13px;display:none;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .code-display{font-family:monospace;font-size:26px;font-weight:800;letter-spacing:3px;color:var(--pri);background:#eff6ff;border:2px solid #93c5fd;padding:10px 18px;border-radius:4px;display:inline-block;margin:8px 0}
   .pin-overlay{position:fixed;inset:0;background:#0f172a;color:#fff;display:none;align-items:center;justify-content:center;z-index:999;padding:16px}
   .pin-box{background:#fff;color:var(--text);padding:22px;border-radius:6px;max-width:340px;width:100%;text-align:center}
+  .tbl-sel{padding:3px 5px;font-size:12px;min-width:95px}
   @media print{body{background:#fff;font-size:12px}.topbar,.nav-bar,.no-print{display:none!important}.container{max-width:100%;margin:0;padding:0}.card{border:none;padding:0}.page{display:none!important}#page-statement{display:block!important}th,td{border:1px solid #999;padding:5px 6px}}
 </style>
 </head>
@@ -94,29 +99,31 @@
 <header class="topbar">
   <div><h1>PrimeLedger</h1><small>Personal &amp; Cashbook Accounting Suite</small></div>
   <div class="topbar-right">
-    <span class="topbar-tag">Laptop + Mobile Sync • Excel/CSV • 4GB RAM Safe</span>
-    <button type="button" class="btn btn-sm" style="background:#fff;color:var(--pri);border:none" onclick="switchPage('sync')">Sync Devices</button>
+    <span class="status-pill" id="topSyncPill">Sync: Not Linked</span>
+    <span class="status-pill" id="topBackupPill">Auto-Backup: Ready</span>
+    <button type="button" class="btn btn-sm" style="background:#fff;color:var(--pri);border:none" onclick="syncNow(false)">Sync Now</button>
   </div>
 </header>
 
 <nav class="nav-bar" id="navBar">
   <button class="nav-btn active" data-page="dashboard">1. Dashboard</button>
-  <button class="nav-btn" data-page="entry">2. New Entry</button>
+  <button class="nav-btn" data-page="entry">2. New Entry &amp; Live Edit</button>
   <button class="nav-btn" data-page="import">3. Excel / CSV Import</button>
   <button class="nav-btn" data-page="all">4. All Entries</button>
   <button class="nav-btn" data-page="reports">5. Reports &amp; Udhaar</button>
   <button class="nav-btn" data-page="statement">6. Passbook</button>
-  <button class="nav-btn" data-page="sync">7. Laptop-Mobile Sync</button>
-  <button class="nav-btn" data-page="manage">8. Settings &amp; Backup</button>
+  <button class="nav-btn" data-page="sync">7. 6-Digit Sync</button>
+  <button class="nav-btn" data-page="manage">8. Auto-Backup &amp; Settings</button>
 </nav>
 
 <main class="container">
 
-  <div class="alert-banner" id="backupBanner">
-    <span><strong>Backup Reminder:</strong> Aapne kaafi nayi entries add ki hain. Laptop/Mobile par Sync Code ya Backup save kar lein.</span>
+  <!-- RESUME LOCAL FILE AUTO-BACKUP BANNER -->
+  <div class="banner" id="resumeBackupBanner">
+    <span><strong>Local Auto-Backup File Linked:</strong> Browser restart ke baad direct local file save chalu rakhne ke liye 1-click permission dein.</span>
     <div style="display:flex;gap:6px">
-      <button type="button" class="btn btn-pri btn-sm" onclick="switchPage('sync')">Get Sync Code</button>
-      <button type="button" class="btn btn-sm" onclick="dismissBackupAlert()">Dismiss</button>
+      <button type="button" class="btn btn-pri btn-sm" onclick="resumeLinkedBackupFile()">Resume Auto-Save File</button>
+      <button type="button" class="btn btn-sm" onclick="document.getElementById('resumeBackupBanner').style.display='none'">Later</button>
     </div>
   </div>
 
@@ -162,77 +169,125 @@
     </div>
   </section>
 
-  <!-- PAGE 2: NEW ENTRY (CLEAN DIRECT + QUICK CASH + CONTRA TRANSFER + PRESETS) -->
+  <!-- PAGE 2: NEW ENTRY + ON-THE-SPOT REPORT & INLINE EDITOR -->
   <section class="page" id="page-entry">
-    <div style="max-width:780px;margin:0 auto">
-      <div class="mode-switch">
-        <button type="button" class="mode-btn active" id="mUpiBtn" onclick="setEntryMode('UPI')">UPI / Bank Entry</button>
-        <button type="button" class="mode-btn" id="mCashBtn" onclick="setEntryMode('Cash')">Cash Kharcha (Jeb)</button>
-        <button type="button" class="mode-btn" id="mTrfBtn" onclick="setEntryMode('TRANSFER')">ATM / Wallet Transfer</button>
-      </div>
+    <div class="mode-switch">
+      <button type="button" class="mode-btn active" id="mUpiBtn" onclick="setEntryMode('UPI')">UPI / Bank Entry</button>
+      <button type="button" class="mode-btn" id="mCashBtn" onclick="setEntryMode('Cash')">Cash Kharcha (Jeb)</button>
+      <button type="button" class="mode-btn" id="mTrfBtn" onclick="setEntryMode('TRANSFER')">ATM / Wallet Transfer</button>
+    </div>
 
-      <!-- Quick Recurring Presets -->
-      <div class="card" style="padding:11px 14px">
-        <div style="font-size:12px;font-weight:700;color:var(--pri);margin-bottom:6px">1-Click Quick Templates (Rozana Kharch):</div>
-        <div class="preset-bar" id="presetChips"></div>
+    <div class="card" style="padding:10px 14px">
+      <div style="font-size:12px;font-weight:700;color:var(--pri);margin-bottom:6px">1-Click Quick Templates:</div>
+      <div class="preset-bar" id="presetChips"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span id="formTitle">Transaction Details Bharein</span></div>
+      <form id="entryForm">
+        <input type="hidden" id="editId" value="">
+        <div class="g3" id="normalTypeRow">
+          <div class="form-row"><label for="inpType">Transaction Type *</label>
+            <select id="inpType">
+              <option value="debit">Gaya / Kharcha (Debit -)</option>
+              <option value="credit">Aaya / Mila (Credit +)</option>
+            </select>
+          </div>
+          <div class="form-row"><label for="inpAmt">Amount (₹) *</label><input type="number" id="inpAmt" step="0.01" min="0.01" placeholder="e.g. 120" required></div>
+          <div class="form-row"><label for="inpDate">Date *</label><input type="date" id="inpDate" required></div>
+        </div>
+
+        <div class="g2" id="transferRow" style="display:none">
+          <div class="form-row"><label for="trfDir">Transfer Direction *</label>
+            <select id="trfDir">
+              <option value="BANK_TO_CASH">Bank/UPI se Cash Nikala (ATM Withdrawal)</option>
+              <option value="CASH_TO_BANK">Cash Bank/UPI mein Jama Kiya (Cash Deposit)</option>
+            </select>
+          </div>
+          <div class="form-row"><label for="trfNote">ATM / Bank Naam</label><input type="text" id="trfNote" placeholder="e.g. Canara Bank ATM"></div>
+        </div>
+
+        <div class="g2" id="partyModeRow">
+          <div class="form-row"><label for="inpParty">UPI ID / Dukaan / Party Naam *</label><input type="text" id="inpParty" placeholder="e.g. anand@okicici ya Chai / Auto" oninput="autoSuggestCategory(this.value)"></div>
+          <div class="form-row"><label for="inpMode">Payment Mode *</label>
+            <select id="inpMode">
+              <option value="UPI">UPI</option>
+              <option value="Cash">Cash (Jeb)</option>
+              <option value="Bank">Bank Transfer / Card</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="g3">
+          <div class="form-row">
+            <label for="inpCat">Category * (Nayi add karne ke liye + dabayein)</label>
+            <div class="inline-group">
+              <select id="inpCat" required></select>
+              <button type="button" class="btn btn-sm" title="Add New Category" onclick="toggleQuickAdd('cat')">+</button>
+            </div>
+            <div class="quick-add-box" id="quickCatBox">
+              <div style="display:flex;gap:5px">
+                <input type="text" id="qCatName" placeholder="Nayi Category">
+                <input type="number" id="qCatLim" placeholder="Limit ₹" style="width:90px">
+                <button type="button" class="btn btn-pri btn-sm" onclick="saveQuickCat()">Add</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="inpPer">Person * (Naya add karne ke liye + dabayein)</label>
+            <div class="inline-group">
+              <select id="inpPer" required></select>
+              <button type="button" class="btn btn-sm" title="Add New Person" onclick="toggleQuickAdd('per')">+</button>
+            </div>
+            <div class="quick-add-box" id="quickPerBox">
+              <div style="display:flex;gap:5px">
+                <input type="text" id="qPerName" placeholder="Naya Person">
+                <button type="button" class="btn btn-pri btn-sm" onclick="saveQuickPer()">Add</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row"><label for="inpUdhaar">Udhaar Status</label>
+            <select id="inpUdhaar">
+              <option value="NONE">Normal (Clear)</option>
+              <option value="LENT">Udhaar Diya (Lena Hai)</option>
+              <option value="BORROWED">Udhaar Liya (Dena Hai)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row"><label for="inpNote">Extra Note (Optional)</label><input type="text" id="inpNote" placeholder="e.g. Subah ka nasta, Bill payment"></div>
+
+        <div style="margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <button type="submit" class="btn btn-pri" id="saveBtn">Save Entry</button>
+          <button type="button" class="btn" id="cancelEditBtn" style="display:none">Cancel Edit</button>
+          <span class="msg-ok" id="entryToast"></span>
+        </div>
+      </form>
+    </div>
+
+    <!-- LIVE REPORT & INSTANT INLINE REPORT CHANGER RIGHT ON ENTRY PAGE -->
+    <div class="g2">
+      <div class="card">
+        <div class="card-title">
+          <span>Live Report Changer (Yahin Se Category / Person Badlein)</span>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Date</th><th>Party / UPI</th><th>Category</th><th>Person</th><th>Mode</th><th class="num">Amount</th></tr></thead>
+          <tbody id="entryLiveRecentBody"></tbody>
+        </table></div>
       </div>
 
       <div class="card">
-        <div class="card-title"><span id="formTitle">Transaction Details Bharein</span></div>
-        <form id="entryForm">
-          <input type="hidden" id="editId" value="">
-          <div class="g3" id="normalTypeRow">
-            <div class="form-row"><label for="inpType">Transaction Type *</label>
-              <select id="inpType">
-                <option value="debit">Gaya / Kharcha (Debit -)</option>
-                <option value="credit">Aaya / Mila (Credit +)</option>
-              </select>
-            </div>
-            <div class="form-row"><label for="inpAmt">Amount (₹) *</label><input type="number" id="inpAmt" step="0.01" min="0.01" placeholder="e.g. 120" required></div>
-            <div class="form-row"><label for="inpDate">Date *</label><input type="date" id="inpDate" required></div>
-          </div>
-
-          <div class="g2" id="transferRow" style="display:none">
-            <div class="form-row"><label for="trfDir">Transfer Direction *</label>
-              <select id="trfDir">
-                <option value="BANK_TO_CASH">Bank/UPI se Cash Nikala (ATM Withdrawal)</option>
-                <option value="CASH_TO_BANK">Cash Bank/UPI mein Jama Kiya (Cash Deposit)</option>
-              </select>
-            </div>
-            <div class="form-row"><label for="trfNote">ATM / Bank Naam</label><input type="text" id="trfNote" placeholder="e.g. Canara Bank ATM"></div>
-          </div>
-
-          <div class="g2" id="partyModeRow">
-            <div class="form-row"><label for="inpParty">UPI ID / Dukaan / Party Naam *</label><input type="text" id="inpParty" placeholder="e.g. anand@okicici ya Chai / Auto" oninput="autoSuggestCategory(this.value)"></div>
-            <div class="form-row"><label for="inpMode">Payment Mode *</label>
-              <select id="inpMode">
-                <option value="UPI">UPI</option>
-                <option value="Cash">Cash (Jeb)</option>
-                <option value="Bank">Bank Transfer / Card</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="g3">
-            <div class="form-row"><label for="inpCat">Category *</label><select id="inpCat" required></select></div>
-            <div class="form-row"><label for="inpPer">Person (Kiska Hisaab) *</label><select id="inpPer" required></select></div>
-            <div class="form-row"><label for="inpUdhaar">Udhaar Status</label>
-              <select id="inpUdhaar">
-                <option value="NONE">Normal (Clear)</option>
-                <option value="LENT">Udhaar Diya (Lena Hai)</option>
-                <option value="BORROWED">Udhaar Liya (Dena Hai)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row"><label for="inpNote">Extra Note (Optional)</label><input type="text" id="inpNote" placeholder="e.g. Subah ka nasta, Bill payment"></div>
-
-          <div style="margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <button type="submit" class="btn btn-pri" id="saveBtn">Save Entry</button>
-            <button type="button" class="btn" id="cancelEditBtn" style="display:none">Cancel Edit</button>
-            <span class="msg-ok" id="entryToast"></span>
-          </div>
-        </form>
+        <div class="card-title">
+          <span>Live Category Report (Auto-Updating)</span>
+          <strong id="entryLiveCatTot">₹0.00</strong>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Category</th><th class="num">Gaya (₹)</th><th class="num">Aaya (₹)</th><th class="num">Share</th></tr></thead>
+          <tbody id="entryLiveCatBody"></tbody>
+        </table></div>
       </div>
     </div>
   </section>
@@ -241,7 +296,7 @@
   <section class="page" id="page-import">
     <div class="card">
       <div class="card-title">
-        <span>Bank Excel (.XLS) &amp; CSV Statement Importer (Auto Duplicate Guard)</span>
+        <span>Bank Excel (.XLS) &amp; CSV Statement Importer (Zero Duplicate Guard)</span>
         <button type="button" class="btn btn-sm" id="clearImpBtn">Clear Table</button>
       </div>
       <div class="upload-bar">
@@ -254,7 +309,6 @@
 
       <div id="impStatus" style="margin-bottom:10px;min-height:19px"></div>
 
-      <!-- Manual Column Mapper (Auto-opens if an unusual CSV/XLS header is uploaded) -->
       <div class="card" id="colMapperBox" style="display:none;background:#f8fafc;border-style:dashed">
         <div style="font-weight:700;color:var(--pri);margin-bottom:6px">Custom Column Mapping (Columns Khud Chunein):</div>
         <div class="g3">
@@ -414,39 +468,80 @@
     </div>
   </section>
 
-  <!-- PAGE 7: LAPTOP <-> MOBILE SYNC (ZERO DUPLICATE MERGE) -->
+  <!-- PAGE 7: 6-DIGIT PERMANENT LAPTOP <-> MOBILE SYNC -->
   <section class="page" id="page-sync">
     <div class="g2">
       <div class="card">
-        <div class="card-title"><span>Step 1: Is Device Ka Sync Code Bhejein</span></div>
-        <p style="font-size:12.5px;color:var(--muted);margin-bottom:10px">
-          Is code mein aapki saari entries (<strong id="syncCountLbl">0</strong>) safe packed hain. Ise copy karke WhatsApp/Telegram se apne dusre device (Laptop ya Mobile) par bhejein:
+        <div class="card-title"><span>Option A: Naya 6-Digit Sync Code Banayein</span></div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:8px">
+          Ek baar code generate karke apne dusre device (Mobile ya Laptop) par link kar dein—uske baad dono devices <strong>hamesha connected</strong> rahenge aur entries auto-sync hongi (bina duplicate likhe).
         </p>
-        <textarea id="syncOutBox" rows="5" readonly style="font-family:monospace;font-size:11.5px;background:#f8fafc"></textarea>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-          <button type="button" class="btn btn-pri" onclick="copySyncCode()">Copy Sync Code</button>
-          <button type="button" class="btn" onclick="shareSyncCode()">Share (WhatsApp / Mobile)</button>
+        <div id="activeCodeWrap" style="display:none;margin-bottom:10px">
+          <div style="font-size:12px;font-weight:700;color:var(--cr)">Connected Pair Code:</div>
+          <div class="code-display" id="activePairCodeLbl">PL-0000</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+            <button type="button" class="btn btn-pri btn-sm" onclick="copyPairCode()">Copy Code</button>
+            <button type="button" class="btn btn-ok btn-sm" onclick="syncNow(false)">Sync Now</button>
+            <button type="button" class="btn btn-del btn-sm" onclick="unlinkDevice()">Unlink Code</button>
+          </div>
         </div>
-        <div id="syncOutMsg" class="msg-ok" style="margin-top:8px"></div>
+        <button type="button" class="btn btn-pri" id="genPairBtn" onclick="generatePairCode()">Generate 6-Digit Code</button>
+        <div id="syncStatusBox" style="margin-top:10px;font-weight:600"></div>
       </div>
 
       <div class="card">
-        <div class="card-title"><span>Step 2: Dusre Device Ka Sync Code Paste Karein</span></div>
-        <p style="font-size:12.5px;color:var(--muted);margin-bottom:10px">
-          Dusre device se mila <strong>PLSYNC:...</strong> code niche paste karke <strong>Sync &amp; Merge</strong> dabayein. <strong>Double data automatic skip hoga — sirf nayi entries hi judengi.</strong>
+        <div class="card-title"><span>Option B: Dusre Device Ka Code Dalein (1-Time Link)</span></div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">
+          Laptop ya Mobile par bana hua 6-digit code (jaise <strong>PL-4829</strong>) yahan daal kar <strong>Connect &amp; Sync</strong> dabayein:
         </p>
-        <textarea id="syncInBox" rows="5" placeholder="Yahan PLSYNC:... code paste karein..." style="font-family:monospace;font-size:11.5px"></textarea>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-          <button type="button" class="btn btn-ok" onclick="mergeSyncCode()">Sync &amp; Merge Data</button>
-          <button type="button" class="btn" onclick="document.getElementById('syncInBox').value=''">Clear</button>
+        <div class="form-row" style="max-width:260px">
+          <label for="pairInput">Enter 6-Digit Code *</label>
+          <input type="text" id="pairInput" placeholder="e.g. PL-4829" maxlength="10" style="text-transform:uppercase;font-size:16px;font-weight:700;letter-spacing:2px">
         </div>
-        <div id="syncInMsg" style="margin-top:8px;font-weight:600"></div>
+        <button type="button" class="btn btn-ok" onclick="connectWithCode()">Connect &amp; Sync Permanently</button>
+        <div id="pairConnectMsg" style="margin-top:10px;font-weight:600"></div>
       </div>
     </div>
   </section>
 
-  <!-- PAGE 8: SETTINGS, OPENING BALANCE, LIMITS & BACKUP -->
+  <!-- PAGE 8: AUTO LOCAL FILE BACKUP & SETTINGS -->
   <section class="page" id="page-manage">
+    <!-- DEDICATED LOCAL FILE AUTO-BACKUP CARD -->
+    <div class="card" style="border-left:4px solid var(--cr)">
+      <div class="card-title">
+        <span>Auto Local File Backup (Automatic Save to Device Storage)</span>
+        <span class="badge b-cr" id="autoBkBadge">Active</span>
+      </div>
+      <div class="g2">
+        <div>
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:8px">
+            <strong>Direct File Link (Laptop Chrome/Edge):</strong> Ek baar apne computer par <code>PrimeLedger_AutoBackup.json</code> file select karein—uske baad har entry save/edit hote hi file apne aap update hoti rahegi.
+          </p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button type="button" class="btn btn-pri" onclick="linkLocalBackupFile()">Select Local Auto-Backup File</button>
+            <button type="button" class="btn" onclick="backupNowManual()">Backup Now (.JSON)</button>
+          </div>
+          <div id="localFileStatus" style="margin-top:8px;font-size:12.5px;font-weight:600;color:var(--pri)"></div>
+        </div>
+
+        <div style="background:#f8fafc;padding:10px 12px;border:1px solid var(--border);border-radius:4px">
+          <label class="chk-lbl" style="margin-bottom:8px">
+            <input type="checkbox" id="autoDownloadChk" checked onchange="saveAutoBkPref()">
+            Auto-Download Local Backup File (Mobile &amp; Fallback)
+          </label>
+          <div class="form-row" style="margin-bottom:0">
+            <label for="autoBkFreq">Kitni Entries Ke Baad Auto-Save Ho:</label>
+            <select id="autoBkFreq" onchange="saveAutoBkPref()">
+              <option value="5">Har 5 Nayi Entries Par</option>
+              <option value="10" selected>Har 10 Nayi Entries Par</option>
+              <option value="20">Har 20 Nayi Entries Par</option>
+              <option value="1">Har 1 Entry Par (Instant)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="g2">
       <div class="card">
         <div class="card-title"><span>Opening Wallet Balance (Shuruati Balance)</span></div>
@@ -499,15 +594,15 @@
     </div>
 
     <div class="card">
-      <div class="card-title"><span>Export Excel (CSV) &amp; Smart Merge JSON Backup</span></div>
+      <div class="card-title"><span>Export Excel (CSV) &amp; Restore Local Backup</span></div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
         <button type="button" class="btn btn-pri" onclick="exportCSV()">Download Excel (.CSV)</button>
-        <button type="button" class="btn" onclick="exportJSON()">Download Backup (.JSON)</button>
+        <button type="button" class="btn" onclick="backupNowManual()">Download Backup (.JSON)</button>
         <button type="button" class="btn btn-del" onclick="clearAllData()">Reset All Data</button>
       </div>
       <hr style="border:none;border-top:1px solid var(--border);margin:10px 0">
       <div style="max-width:450px">
-        <label for="impFile" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Merge / Restore Backup (.JSON — Duplicates Auto-Skipped)</label>
+        <label for="impFile" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Restore / Merge Local Backup (.JSON — Duplicates Auto-Skipped)</label>
         <div style="display:flex;gap:8px"><input type="file" id="impFile" accept=".json"><button type="button" class="btn" onclick="importJSON()">Merge Backup</button></div>
       </div>
       <div id="bkMsg" style="margin-top:8px;font-weight:600"></div>
@@ -518,9 +613,10 @@
 <script>
 (function(){
   const K={
-    E:'primeledger_entries_v2',C:'primeledger_cats_v2',CL:'primeledger_catlim_v2',
-    P:'primeledger_persons_v2',B:'primeledger_budget_v2',OB:'primeledger_openbal_v2',
-    T:'primeledger_presets_v2',PIN:'primeledger_pin_v2',CNT:'primeledger_since_bk_v2'
+    E:'primeledger_entries_v3',DEL:'primeledger_deleted_v3',C:'primeledger_cats_v3',
+    CL:'primeledger_catlim_v3',P:'primeledger_persons_v3',B:'primeledger_budget_v3',
+    OB:'primeledger_openbal_v3',T:'primeledger_presets_v3',PIN:'primeledger_pin_v3',
+    PAIR:'primeledger_paircode_v3',ABK:'primeledger_autobk_v3'
   };
   const DEF_C=['Nasta','Miscellaneous','Ghar Ka Kharcha','Travel','Bills & Recharge','Salary / Income'];
   const DEF_P=['Khud','Ghar','Dost','Office'];
@@ -530,8 +626,10 @@
   ];
   const $=id=>document.getElementById(id);
 
-  let entries=[],categories=[],catLimits={},persons=[],budget=0,openBal={cash:0,bank:0},presets=[],appPin='',sinceBk=0;
+  let entries=[],deletedIds=[],categories=[],catLimits={},persons=[],budget=0,openBal={cash:0,bank:0},presets=[],appPin='';
+  let pairCode='',autoBk={enabled:true,freq:10,counter:0,lastDate:''};
   let impRows=[],impFilter='UPI',rawGrid=[],entryMode='UPI';
+  let fileHandle=null,syncTimer=null,isSyncing=false;
 
   function todayISO(){
     const d=new Date();
@@ -549,7 +647,22 @@
     return(v<0?'-':'')+'₹'+Math.abs(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
   }
 
-  /* STRICT DEDUPLICATION KEY: prevents double entries during CSV import, Sync Code merge, and JSON restore */
+  /* Pure-JS deterministic 128-bit hex hash (works identically on file:// and https://) */
+  function hashCodeToTopic(code){
+    const str='PRIMELEDGER_SYNC_SALT_2026_'+String(code||'').trim().toUpperCase();
+    let h1=0x811c9dc5,h2=0x1b873593,h3=0x85ebca6b,h4=0xc2b2ae35;
+    for(let i=0;i<str.length;i++){
+      const ch=str.charCodeAt(i);
+      h1=Math.imul(h1^ch,0x01000193);
+      h2=Math.imul(h2^(ch+i),0x27d4eb2f);
+      h3=Math.imul(h3^(ch*31),0x165667b1);
+      h4=Math.imul(h4^(ch^0x5a),0x9e3779b9);
+    }
+    const hex=n=>(n>>>0).toString(16).padStart(8,'0');
+    return 'pl_sync_'+hex(h1)+hex(h2)+hex(h3)+hex(h4);
+  }
+
+  /* STRICT DEDUPLICATION ENGINE */
   function entryFingerprint(e){
     const d=String(e.date||'').trim();
     const a=(Number(e.amount)||0).toFixed(2);
@@ -559,14 +672,24 @@
     return d+'|'+a+'|'+t+'|'+md+'|'+m;
   }
 
-  function mergeEntryList(incomingList){
+  function mergeEntryList(incomingList,incomingDeleted){
+    if(Array.isArray(incomingDeleted)){
+      const dSet=new Set(deletedIds);
+      incomingDeleted.forEach(id=>dSet.add(String(id)));
+      deletedIds=Array.from(dSet).slice(-500);
+      entries=entries.filter(e=>!dSet.has(String(e.id)));
+    }
+    const delSet=new Set(deletedIds);
     const seenIds=new Set(entries.map(x=>String(x.id)));
     const seenFp=new Set(entries.map(entryFingerprint));
     let added=0,skipped=0;
+
     incomingList.forEach((raw,idx)=>{
       if(!raw||!raw.date||!(Number(raw.amount)>0))return;
+      const cleanId=sid(raw.id||(Date.now()+'_'+idx+'_'+Math.floor(Math.random()*9999)));
+      if(delSet.has(cleanId)){skipped++;return;}
       const clean={
-        id:sid(raw.id||(Date.now()+'_'+idx+'_'+Math.floor(Math.random()*9999))),
+        id:cleanId,
         type:raw.type==='credit'?'credit':(raw.type==='transfer'?'transfer':'debit'),
         amount:Number(raw.amount),
         date:String(raw.date).trim(),
@@ -592,44 +715,331 @@
 
   function load(){
     try{
-      const r=localStorage.getItem(K.E)||localStorage.getItem('primeledger_entries_v1');
+      const r=localStorage.getItem(K.E)||localStorage.getItem('primeledger_entries_v2')||localStorage.getItem('primeledger_entries_v1');
       const arr=r?JSON.parse(r):[];
       entries=[];
-      if(Array.isArray(arr))mergeEntryList(arr);
+      if(Array.isArray(arr))mergeEntryList(arr,[]);
     }catch(e){entries=[];}
-    try{const r=localStorage.getItem(K.C)||localStorage.getItem('primeledger_cats_v1');categories=r?JSON.parse(r):DEF_C.slice();if(!Array.isArray(categories)||!categories.length)categories=DEF_C.slice();}catch(e){categories=DEF_C.slice();}
+    try{const r=localStorage.getItem(K.DEL);deletedIds=r?JSON.parse(r):[];if(!Array.isArray(deletedIds))deletedIds=[];}catch(e){deletedIds=[];}
+    try{const r=localStorage.getItem(K.C)||localStorage.getItem('primeledger_cats_v2');categories=r?JSON.parse(r):DEF_C.slice();if(!Array.isArray(categories)||!categories.length)categories=DEF_C.slice();}catch(e){categories=DEF_C.slice();}
     try{const r=localStorage.getItem(K.CL);catLimits=r?JSON.parse(r):{};if(!catLimits||typeof catLimits!=='object')catLimits={};}catch(e){catLimits={};}
-    try{const r=localStorage.getItem(K.P)||localStorage.getItem('primeledger_persons_v1');persons=r?JSON.parse(r):DEF_P.slice();if(!Array.isArray(persons)||!persons.length)persons=DEF_P.slice();}catch(e){persons=DEF_P.slice();}
+    try{const r=localStorage.getItem(K.P)||localStorage.getItem('primeledger_persons_v2');persons=r?JSON.parse(r):DEF_P.slice();if(!Array.isArray(persons)||!persons.length)persons=DEF_P.slice();}catch(e){persons=DEF_P.slice();}
     try{const r=localStorage.getItem(K.OB);openBal=r?JSON.parse(r):{cash:0,bank:0};}catch(e){openBal={cash:0,bank:0};}
     try{const r=localStorage.getItem(K.T);presets=r?JSON.parse(r):DEF_T.slice();if(!Array.isArray(presets))presets=DEF_T.slice();}catch(e){presets=DEF_T.slice();}
-    budget=Number(localStorage.getItem(K.B)||localStorage.getItem('primeledger_budget_v1'))||0;
+    try{const r=localStorage.getItem(K.ABK);if(r)autoBk={...autoBk,...JSON.parse(r)};}catch(e){}
+    budget=Number(localStorage.getItem(K.B)||localStorage.getItem('primeledger_budget_v2'))||0;
     appPin=localStorage.getItem(K.PIN)||'';
-    sinceBk=Number(localStorage.getItem(K.CNT))||0;
+    pairCode=localStorage.getItem(K.PAIR)||'';
   }
 
-  function saveE(incCount){
-    localStorage.setItem(K.E,JSON.stringify(entries));
-    if(incCount){
-      sinceBk+=incCount;
-      localStorage.setItem(K.CNT,String(sinceBk));
+  function buildBackupObject(){
+    return{
+      app:'PrimeLedger',
+      exportedAt:new Date().toISOString(),
+      budget,openBal,catLimits,categories,persons,presets,deletedIds,entries
+    };
+  }
+
+  /* ============== INDEXEDDB HANDLE STORAGE FOR TRUE LOCAL FILE AUTO-BACKUP ============== */
+  function openHandleDB(){
+    return new Promise((resolve,reject)=>{
+      if(!window.indexedDB){reject(new Error('No IDB'));return;}
+      const req=indexedDB.open('primeledger_fs_db',1);
+      req.onupgradeneeded=()=>req.result.createObjectStore('handles');
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+  }
+  async function storeFileHandle(handle){
+    try{
+      const db=await openHandleDB();
+      const tx=db.transaction('handles','readwrite');
+      tx.objectStore('handles').put(handle,'autobackup');
+    }catch(e){}
+  }
+  async function loadStoredFileHandle(){
+    try{
+      const db=await openHandleDB();
+      return await new Promise(res=>{
+        const tx=db.transaction('handles','readonly');
+        const req=tx.objectStore('handles').get('autobackup');
+        req.onsuccess=()=>res(req.result||null);
+        req.onerror=()=>res(null);
+      });
+    }catch(e){return null;}
+  }
+
+  async function writeDirectlyToLinkedFile(){
+    if(!fileHandle)return false;
+    try{
+      const perm=await fileHandle.queryPermission({mode:'readwrite'});
+      if(perm!=='granted'){
+        $('resumeBackupBanner').style.display='flex';
+        $('topBackupPill').textContent='Backup: Click Resume';
+        return false;
+      }
+      const writable=await fileHandle.createWritable();
+      await writable.write(JSON.stringify(buildBackupObject(),null,2));
+      await writable.close();
+      const nowTime=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+      $('topBackupPill').textContent='File Saved: '+nowTime;
+      $('localFileStatus').textContent='Linked File Active ('+fileHandle.name+') — Last auto-saved at '+nowTime;
+      return true;
+    }catch(e){
+      return false;
     }
-    checkBackupBanner();
-  }
-  function saveSettings(){
-    localStorage.setItem(K.C,JSON.stringify(categories));
-    localStorage.setItem(K.CL,JSON.stringify(catLimits));
-    localStorage.setItem(K.P,JSON.stringify(persons));
-    localStorage.setItem(K.T,JSON.stringify(presets));
   }
 
-  function checkBackupBanner(){
-    $('backupBanner').style.display=sinceBk>=25?'flex':'none';
-  }
-  window.dismissBackupAlert=function(){
-    sinceBk=0;localStorage.setItem(K.CNT,'0');$('backupBanner').style.display='none';
+  window.linkLocalBackupFile=async function(){
+    if(!window.showSaveFilePicker){
+      alert('Aapka browser direct folder link support nahi karta (Mobile par Auto-Download backup active hai).');
+      return;
+    }
+    try{
+      fileHandle=await window.showSaveFilePicker({
+        suggestedName:'PrimeLedger_AutoBackup.json',
+        types:[{description:'PrimeLedger JSON Backup',accept:{'application/json':['.json']}}]
+      });
+      await storeFileHandle(fileHandle);
+      await writeDirectlyToLinkedFile();
+      $('resumeBackupBanner').style.display='none';
+    }catch(e){}
   };
 
-  /* PIN LOCK */
+  window.resumeLinkedBackupFile=async function(){
+    if(!fileHandle)return;
+    try{
+      const perm=await fileHandle.requestPermission({mode:'readwrite'});
+      if(perm==='granted'){
+        $('resumeBackupBanner').style.display='none';
+        await writeDirectlyToLinkedFile();
+      }
+    }catch(e){}
+  };
+
+  function triggerDl(blob,name){
+    const u=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(u),1000);
+  }
+
+  window.backupNowManual=function(){
+    autoBk.counter=0;
+    autoBk.lastDate=todayISO();
+    try{localStorage.setItem(K.ABK,JSON.stringify(autoBk));}catch(e){}
+    triggerDl(new Blob([JSON.stringify(buildBackupObject(),null,2)],{type:'application/json'}),'PrimeLedger_AutoBackup_'+todayISO()+'.json');
+    $('topBackupPill').textContent='Backup Downloaded';
+  };
+
+  window.saveAutoBkPref=function(){
+    autoBk.enabled=$('autoDownloadChk').checked;
+    autoBk.freq=Number($('autoBkFreq').value)||10;
+    try{localStorage.setItem(K.ABK,JSON.stringify(autoBk));}catch(e){}
+    updateBackupBadge();
+  };
+
+  function updateBackupBadge(){
+    const b=$('autoBkBadge');
+    if(fileHandle){b.textContent='Direct File Linked';b.className='badge b-cr';}
+    else if(autoBk.enabled){b.textContent='Auto-Download ON (Every '+autoBk.freq+')';b.className='badge b-cr';}
+    else{b.textContent='Manual Only';b.className='badge';}
+  }
+
+  async function runAutoBackup(changeCount){
+    // 1) If user linked a local file via File System Access API, write silently immediately
+    const wroteDirect=await writeDirectlyToLinkedFile();
+    if(wroteDirect)return;
+
+    // 2) Otherwise check Auto-Download counter
+    if(!autoBk.enabled||!changeCount)return;
+    autoBk.counter=(Number(autoBk.counter)||0)+changeCount;
+    if(autoBk.counter>=autoBk.freq){
+      autoBk.counter=0;
+      autoBk.lastDate=todayISO();
+      triggerDl(new Blob([JSON.stringify(buildBackupObject(),null,2)],{type:'application/json'}),'PrimeLedger_AutoBackup_'+todayISO()+'.json');
+      $('topBackupPill').textContent='Auto-Saved Local File';
+    }
+    try{localStorage.setItem(K.ABK,JSON.stringify(autoBk));}catch(e){}
+  }
+
+  function saveAllState(changeCount,shouldPushSync){
+    try{
+      localStorage.setItem(K.E,JSON.stringify(entries));
+      localStorage.setItem(K.DEL,JSON.stringify(deletedIds));
+    }catch(e){}
+    if(changeCount>0)runAutoBackup(changeCount);
+    if(shouldPushSync&&pairCode)pushSyncState();
+  }
+
+  function saveSettings(){
+    try{
+      localStorage.setItem(K.C,JSON.stringify(categories));
+      localStorage.setItem(K.CL,JSON.stringify(catLimits));
+      localStorage.setItem(K.P,JSON.stringify(persons));
+      localStorage.setItem(K.T,JSON.stringify(presets));
+    }catch(e){}
+  }
+
+  /* ============== 6-DIGIT PERMANENT LAPTOP <-> MOBILE SYNC ============== */
+  function updateSyncUI(){
+    const pill=$('topSyncPill');
+    if(pairCode){
+      pill.textContent='Linked: '+pairCode;
+      $('activeCodeWrap').style.display='block';
+      $('activePairCodeLbl').textContent=pairCode;
+      $('genPairBtn').textContent='Generate New Code';
+    }else{
+      pill.textContent='Sync: Not Linked';
+      $('activeCodeWrap').style.display='none';
+      $('genPairBtn').textContent='Generate 6-Digit Code';
+    }
+  }
+
+  window.generatePairCode=function(){
+    const num=Math.floor(1000+Math.random()*9000);
+    pairCode='PL-'+num;
+    try{localStorage.setItem(K.PAIR,pairCode);}catch(e){}
+    updateSyncUI();
+    startAutoSyncLoop();
+    pushSyncState();
+    $('syncStatusBox').className='msg-ok';
+    $('syncStatusBox').textContent='Code '+pairCode+' ban gaya hai! Ise dusre device par 1 baar dalein.';
+  };
+
+  window.copyPairCode=function(){
+    if(!pairCode)return;
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(pairCode).then(()=>{
+        $('syncStatusBox').className='msg-ok';
+        $('syncStatusBox').textContent='Code '+pairCode+' copy ho gaya!';
+      }).catch(()=>{});
+    }
+  };
+
+  window.connectWithCode=async function(){
+    let raw=($('pairInput').value||'').trim().toUpperCase();
+    const msg=$('pairConnectMsg');
+    if(!raw){msg.className='msg-err';msg.textContent='Pehle 6-digit code dalein (e.g. PL-4829).';return;}
+    if(/^\d{4}$/.test(raw))raw='PL-'+raw;
+    if(!/^PL-\d{4}$/.test(raw)){msg.className='msg-err';msg.textContent='Sahi format dalein: PL-XXXX (e.g. PL-4829).';return;}
+    pairCode=raw;
+    try{localStorage.setItem(K.PAIR,pairCode);}catch(e){}
+    updateSyncUI();
+    startAutoSyncLoop();
+    msg.className='msg-warn';
+    msg.textContent='Connecting & syncing with '+pairCode+'...';
+    const ok=await syncNow(true);
+    if(ok){
+      msg.className='msg-ok';
+      msg.textContent='Connected! Ab dono devices hamesha linked hain aur auto-sync honge.';
+      $('pairInput').value='';
+    }else{
+      msg.className='msg-warn';
+      msg.textContent='Code '+pairCode+' save ho gaya hai. Internet milte hi data auto-sync ho jayega.';
+    }
+  };
+
+  window.unlinkDevice=function(){
+    if(!confirm('Kya aap is device se sync code unlink karna chahte hain? (Local data safe rahega)'))return;
+    pairCode='';
+    try{localStorage.removeItem(K.PAIR);}catch(e){}
+    if(syncTimer){clearInterval(syncTimer);syncTimer=null;}
+    updateSyncUI();
+    $('syncStatusBox').textContent='Device unlink ho gaya.';
+  };
+
+  async function pushSyncState(){
+    if(!pairCode||!navigator.onLine)return false;
+    const topic=hashCodeToTopic(pairCode);
+    const payload=JSON.stringify({
+      ts:Date.now(),
+      e:entries,
+      del:deletedIds,
+      c:categories,
+      cl:catLimits,
+      p:persons,
+      b:budget,
+      ob:openBal
+    });
+    try{
+      const resp=await fetch('https://ntfy.sh/'+topic,{
+        method:'POST',
+        body:payload
+      });
+      if(resp.ok){
+        $('topSyncPill').textContent='Synced ('+pairCode+')';
+        return true;
+      }
+    }catch(e){
+      $('topSyncPill').textContent='Offline ('+pairCode+')';
+    }
+    return false;
+  }
+
+  window.syncNow=async function(silent){
+    if(!pairCode){
+      if(!silent)switchPage('sync');
+      return false;
+    }
+    if(isSyncing)return false;
+    if(!navigator.onLine){
+      $('topSyncPill').textContent='Offline ('+pairCode+')';
+      return false;
+    }
+    isSyncing=true;
+    $('topSyncPill').textContent='Syncing...';
+    const topic=hashCodeToTopic(pairCode);
+    let success=false;
+    try{
+      const resp=await fetch('https://ntfy.sh/'+topic+'/json?poll=1&since=all');
+      if(resp.ok){
+        const text=await resp.text();
+        const lines=text.split(/\r?\n/).filter(Boolean);
+        let totalAdded=0;
+        lines.forEach(line=>{
+          try{
+            const envelope=JSON.parse(line);
+            if(envelope&&envelope.message){
+              const data=JSON.parse(envelope.message);
+              if(data&&Array.isArray(data.e)){
+                const res=mergeEntryList(data.e,data.del||[]);
+                totalAdded+=res.added;
+                if(Array.isArray(data.c))data.c.forEach(c=>{if(!categories.includes(c))categories.push(c);});
+                if(Array.isArray(data.p))data.p.forEach(p=>{if(!persons.includes(p))persons.push(p);});
+                if(data.cl&&typeof data.cl==='object')catLimits={...data.cl,...catLimits};
+              }
+            }
+          }catch(err){}
+        });
+        if(totalAdded>0){
+          saveAllState(totalAdded,false);
+          saveSettings();
+          fillDD();
+          refreshActiveView();
+        }
+        await pushSyncState();
+        success=true;
+        $('topSyncPill').textContent='Synced ('+pairCode+')';
+        if(!silent){
+          $('syncStatusBox').className='msg-ok';
+          $('syncStatusBox').textContent='Sync Complete! '+totalAdded+' nayi entries merge hui (zero duplicates).';
+        }
+      }
+    }catch(e){
+      $('topSyncPill').textContent='Offline ('+pairCode+')';
+    }finally{
+      isSyncing=false;
+    }
+    return success;
+  };
+
+  function startAutoSyncLoop(){
+    if(syncTimer)clearInterval(syncTimer);
+    if(!pairCode)return;
+    syncTimer=setInterval(()=>{if(document.visibilityState==='visible')syncNow(true);},25000);
+  }
+
+  /* ============== PIN LOCK & NAVIGATION ============== */
   window.unlockApp=function(){
     const v=($('pinUnlockInp').value||'').trim();
     if(v===appPin){
@@ -640,6 +1050,119 @@
       $('pinErr').textContent='Galat PIN! Dobara koshish karein.';
     }
   };
+
+  function refreshActiveView(){
+    const activeBtn=document.querySelector('.nav-btn.active');
+    const p=activeBtn?activeBtn.getAttribute('data-page'):'dashboard';
+    if(p==='dashboard')renderDash();
+    if(p==='entry'){renderPresets();renderEntryLivePanels();}
+    if(p==='all')renderAll();
+    if(p==='reports')renderReports();
+    if(p==='statement')renderStatement();
+  }
+
+  window.switchPage=function(p){
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('data-page')===p));
+    const el=$('page-'+p);if(el)el.classList.add('active');
+    if(p==='dashboard')renderDash();
+    if(p==='entry'){renderPresets();renderEntryLivePanels();}
+    if(p==='all')renderAll();
+    if(p==='reports')renderReports();
+    if(p==='statement')renderStatement();
+    if(p==='sync')updateSyncUI();
+    if(p==='manage'){
+      renderLists();
+      updateBackupBadge();
+      $('autoDownloadChk').checked=!!autoBk.enabled;
+      $('autoBkFreq').value=String(autoBk.freq||10);
+      $('budgetInp').value=budget||'';
+      $('openCashInp').value=openBal.cash||'';
+      $('openBankInp').value=openBal.bank||'';
+      $('pinSetInp').value=appPin||'';
+    }
+  };
+
+  /* ============== ENTRY PAGE: QUICK ADD + LIVE INLINE REPORT CHANGER ============== */
+  window.toggleQuickAdd=function(kind){
+    const box=$(kind==='cat'?'quickCatBox':'quickPerBox');
+    box.style.display=box.style.display==='block'?'none':'block';
+  };
+  window.saveQuickCat=function(){
+    const name=($('qCatName').value||'').trim();
+    const lim=Math.max(0,Number($('qCatLim').value)||0);
+    if(!name)return;
+    if(!categories.some(c=>c.toLowerCase()===name.toLowerCase()))categories.push(name);
+    if(lim>0)catLimits[name]=lim;
+    saveSettings();fillDD();
+    $('inpCat').value=name;
+    $('qCatName').value='';$('qCatLim').value='';
+    $('quickCatBox').style.display='none';
+    renderEntryLivePanels();
+  };
+  window.saveQuickPer=function(){
+    const name=($('qPerName').value||'').trim();
+    if(!name)return;
+    if(!persons.some(p=>p.toLowerCase()===name.toLowerCase()))persons.push(name);
+    saveSettings();fillDD();
+    $('inpPer').value=name;
+    $('qPerName').value='';
+    $('quickPerBox').style.display='none';
+    renderEntryLivePanels();
+  };
+
+  /* Instant Inline Change on Entry Page (Change Category / Person / Mode without leaving page) */
+  window.inlineUpdateEntry=function(id,field,val){
+    const idx=entries.findIndex(x=>String(x.id)===String(id));
+    if(idx===-1)return;
+    entries[idx][field]=val;
+    saveAllState(1,true);
+    renderEntryLivePanels();
+  };
+
+  function renderEntryLivePanels(){
+    const co=categories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
+    const po=persons.map(p=>'<option value="'+esc(p)+'">'+esc(p)+'</option>').join('');
+    const rec=entries.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||String(b.id).localeCompare(String(a.id))).slice(0,8);
+
+    const tbody=$('entryLiveRecentBody');
+    if(!rec.length){
+      tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#6b7280">Abhi koi entry nahi hai.</td></tr>';
+    }else{
+      tbody.innerHTML=rec.map(r=>{
+        const cr=r.type==='credit';
+        return'<tr>'+
+          '<td>'+esc(r.date)+'</td>'+
+          '<td>'+esc(r.merchant)+'</td>'+
+          '<td><select class="tbl-sel" id="elc_'+esc(r.id)+'" onchange="inlineUpdateEntry(\''+esc(r.id)+'\',\'category\',this.value)">'+co+'</select></td>'+
+          '<td><select class="tbl-sel" id="elp_'+esc(r.id)+'" onchange="inlineUpdateEntry(\''+esc(r.id)+'\',\'person\',this.value)">'+po+'</select></td>'+
+          '<td><select class="tbl-sel" style="min-width:72px" id="elm_'+esc(r.id)+'" onchange="inlineUpdateEntry(\''+esc(r.id)+'\',\'mode\',this.value)"><option value="UPI">UPI</option><option value="Cash">Cash</option><option value="Bank">Bank</option></select></td>'+
+          '<td class="num '+(cr?'txt-cr':'txt-dr')+'"><strong>'+fmt(r.amount)+'</strong></td>'+
+        '</tr>';
+      }).join('');
+      rec.forEach(r=>{
+        const cEl=$('elc_'+r.id),pEl=$('elp_'+r.id),mEl=$('elm_'+r.id);
+        if(cEl)cEl.value=r.category;
+        if(pEl)pEl.value=r.person;
+        if(mEl)mEl.value=r.mode||'UPI';
+      });
+    }
+
+    // Live Category Report Table right beside it
+    const map={};let totD=0;
+    entries.forEach(e=>{
+      if(e.type==='transfer')return;
+      const k=(e.category||'Other').trim(),a=Number(e.amount)||0;
+      if(!map[k])map[k]={d:0,r:0};
+      if(e.type==='credit')map[k].r+=a;else{map[k].d+=a;totD+=a;}
+    });
+    const rows=Object.keys(map).map(k=>({n:k,...map[k]})).sort((a,b)=>b.d-a.d||b.r-a.r);
+    $('entryLiveCatTot').textContent='Total Gaya: '+fmt(totD);
+    $('entryLiveCatBody').innerHTML=rows.length?rows.map(x=>{
+      const pct=totD>0?((x.d/totD)*100).toFixed(1)+'%':'0.0%';
+      return'<tr><td><strong>'+esc(x.n)+'</strong></td><td class="num txt-dr">'+fmt(x.d)+'</td><td class="num txt-cr">'+fmt(x.r)+'</td><td class="num">'+pct+'</td></tr>';
+    }).join(''):'<tr><td colspan="4" style="text-align:center;color:#6b7280">No data yet</td></tr>';
+  }
 
   function fillDD(){
     const co=categories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
@@ -653,7 +1176,7 @@
   function renderPresets(){
     $('presetChips').innerHTML=presets.length
       ?presets.map((t,i)=>'<button type="button" class="chip" onclick="applyPreset('+i+')">'+esc(t.name)+' (₹'+t.amount+' • '+esc(t.mode)+')</button>').join('')
-      :'<span style="font-size:12px;color:var(--muted)">Settings tab se apna daily template add karein.</span>';
+      :'<span style="font-size:12px;color:var(--muted)">Settings se quick template add karein.</span>';
   }
   window.applyPreset=function(idx){
     const t=presets[idx];if(!t)return;
@@ -702,25 +1225,7 @@
   };
   window.openQuickCash=function(){resetForm();setEntryMode('Cash');switchPage('entry');};
 
-  window.switchPage=function(p){
-    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('data-page')===p));
-    const el=$('page-'+p);if(el)el.classList.add('active');
-    if(p==='dashboard')renderDash();
-    if(p==='entry')renderPresets();
-    if(p==='all')renderAll();
-    if(p==='reports')renderReports();
-    if(p==='statement')renderStatement();
-    if(p==='sync')prepareSyncPage();
-    if(p==='manage'){
-      renderLists();
-      $('budgetInp').value=budget||'';
-      $('openCashInp').value=openBal.cash||'';
-      $('openBankInp').value=openBal.bank||'';
-      $('pinSetInp').value=appPin||'';
-    }
-  };
-
+  /* ============== DASHBOARD ============== */
   function renderDash(){
     const mp=todayISO().slice(0,7);
     let tIn=0,tOut=0,cNet=Number(openBal.cash)||0,bNet=Number(openBal.bank)||0,mOut=0,udNet=0;
@@ -773,7 +1278,7 @@
     ).join(''):'<tr><td colspan="4" style="text-align:center;color:#6b7280">Is mahine abhi koi kharcha nahi hua.</td></tr>';
   }
 
-  /* ALL ENTRIES + QUICK DATE PRESETS */
+  /* ============== ALL ENTRIES ============== */
   window.setQuickDate=function(mode){
     const t=todayISO();
     if(mode==='TODAY'){$('allFrom').value=t;$('allTo').value=t;}
@@ -809,7 +1314,7 @@
     $('allIn').textContent=fmt(sIn);$('allOut').textContent=fmt(sOut);$('allNet').textContent=fmt(sIn-sOut);
   }
 
-  /* REPORTS (4 SUB-TABS) */
+  /* ============== REPORTS ============== */
   let activeRepTab='cat';
   window.setReportTab=function(t){
     activeRepTab=t;
@@ -888,10 +1393,10 @@
     if(idx===-1)return;
     entries[idx].udhaar='NONE';
     entries[idx].note=(entries[idx].note?entries[idx].note+' | ':'')+'Settled on '+todayISO();
-    saveE(0);renderReports();renderDash();
+    saveAllState(1,true);renderReports();renderDash();
   };
 
-  /* PASSBOOK STATEMENT */
+  /* ============== PASSBOOK STATEMENT ============== */
   window.renderStatement=function(){
     const fd=$('sFrom').value,td=$('sTo').value,mf=$('sMode').value,cf=$('sCat').value,pf=$('sPer').value;
     let op=0;
@@ -932,91 +1437,10 @@
     $('stmtMeta').textContent='Period: '+(fd||'Start')+' to '+(td||'Today')+' | Wallet: '+mf;
   };
 
-  /* ============== LAPTOP <-> MOBILE SYNC ENGINE (ZERO DUPLICATE MERGE) ============== */
-  function encodeUtf8Base64(str){
-    const bytes=new TextEncoder().encode(str);
-    let bin='';
-    for(let i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);
-    return btoa(bin);
-  }
-  function decodeUtf8Base64(b64){
-    const bin=atob(b64);
-    const bytes=new Uint8Array(bin.length);
-    for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
-    return new TextDecoder().decode(bytes);
-  }
-
-  function prepareSyncPage(){
-    $('syncCountLbl').textContent=String(entries.length);
-    const payload={
-      v:2,
-      e:entries,
-      c:categories,
-      cl:catLimits,
-      p:persons,
-      b:budget,
-      ob:openBal,
-      t:presets
-    };
-    const code='PLSYNC:'+encodeUtf8Base64(JSON.stringify(payload));
-    $('syncOutBox').value=code;
-    $('syncOutMsg').textContent='';
-  }
-
-  window.copySyncCode=function(){
-    const box=$('syncOutBox');
-    box.select();
-    box.setSelectionRange(0,999999);
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(box.value).then(()=>{
-        $('syncOutMsg').textContent='Sync Code copy ho gaya! Ab dusre device par paste karein.';
-      }).catch(()=>{
-        document.execCommand('copy');
-        $('syncOutMsg').textContent='Sync Code copy ho gaya!';
-      });
-    }else{
-      document.execCommand('copy');
-      $('syncOutMsg').textContent='Sync Code copy ho gaya!';
-    }
-  };
-
-  window.shareSyncCode=function(){
-    const code=$('syncOutBox').value;
-    if(navigator.share){
-      navigator.share({title:'PrimeLedger Sync Code',text:code}).catch(()=>{});
-    }else{
-      copySyncCode();
-    }
-  };
-
-  window.mergeSyncCode=function(){
-    const raw=($('syncInBox').value||'').trim();
-    const msg=$('syncInMsg');
-    if(!raw){msg.className='msg-err';msg.textContent='Pehle dusre device ka PLSYNC code paste karein.';return;}
-    try{
-      const b64=raw.startsWith('PLSYNC:')?raw.slice(7).trim():raw;
-      const obj=JSON.parse(decodeUtf8Base64(b64));
-      if(!obj||!Array.isArray(obj.e))throw new Error('Invalid');
-      const res=mergeEntryList(obj.e);
-      if(Array.isArray(obj.c))obj.c.forEach(c=>{if(!categories.includes(c))categories.push(c);});
-      if(Array.isArray(obj.p))obj.p.forEach(p=>{if(!persons.includes(p))persons.push(p);});
-      if(obj.cl&&typeof obj.cl==='object')catLimits={...obj.cl,...catLimits};
-      if(!budget&&obj.b){budget=Number(obj.b)||0;localStorage.setItem(K.B,String(budget));}
-      saveE(0);saveSettings();fillDD();prepareSyncPage();
-      msg.className='msg-ok';
-      msg.textContent='Sync Complete! '+res.added+' nayi entries jud gayi ('+res.skipped+' duplicate entries skip ki gayi).';
-      $('syncInBox').value='';
-    }catch(err){
-      msg.className='msg-err';
-      msg.textContent='Error: Poora sahi PLSYNC code paste karein (beech se kata hua nahi).';
-    }
-  };
-
-  /* ============== EXCEL (.XLS) & CSV IMPORTER (ZERO DUPLICATES) ============== */
+  /* ============== EXCEL (.XLS) & CSV IMPORTER ============== */
   function normDate(s){
     const mo={jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
     let str=String(s||'').trim();
-    // Strip trailing timestamp like "24/11/2026 14:30:00"
     str=str.replace(/\s+\d{1,2}:\d{2}(:\d{2})?(\s*[AP]M)?$/i,'').trim();
     let m;
     if((m=str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/)))return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
@@ -1257,8 +1681,8 @@
     const vis=getVisibleImpItems().map(x=>x.r);
     const sel=vis.filter(r=>r.checked&&Number(r.amount)>0&&r.date&&r.merchant.trim());
     if(!sel.length){if(!isAuto)alert('Save karne ke liye kam se kam 1 valid row select karein.');return;}
-    const res=mergeEntryList(sel);
-    saveE(res.added);
+    const res=mergeEntryList(sel,[]);
+    saveAllState(res.added,true);
     const savedSet=new Set(sel);
     impRows=impRows.filter(r=>!savedSet.has(r));
     renderImpTable();
@@ -1278,18 +1702,18 @@
 
   window.saveOpeningBal=function(){
     openBal={cash:Number($('openCashInp').value)||0,bank:Number($('openBankInp').value)||0};
-    localStorage.setItem(K.OB,JSON.stringify(openBal));
+    try{localStorage.setItem(K.OB,JSON.stringify(openBal));}catch(e){}
     $('openBalMsg').textContent='Opening Balance Saved!';
     setTimeout(()=>$('openBalMsg').textContent='',2200);
   };
 
   window.saveBudgetAndPin=function(){
     budget=Math.max(0,Number($('budgetInp').value)||0);
-    localStorage.setItem(K.B,String(budget));
+    try{localStorage.setItem(K.B,String(budget));}catch(e){}
     const p=($('pinSetInp').value||'').trim();
     if(p&&!/^\d{4,6}$/.test(p)){alert('PIN sirf 4 se 6 digits ka hona chahiye.');return;}
     appPin=p;
-    localStorage.setItem(K.PIN,appPin);
+    try{localStorage.setItem(K.PIN,appPin);}catch(e){}
     $('budgetMsg').textContent='Limit & PIN Saved!';
     setTimeout(()=>$('budgetMsg').textContent='',2200);
   };
@@ -1344,15 +1768,12 @@
 
   window.delEntry=function(id){
     if(!confirm('Is entry ko delete karein?'))return;
-    entries=entries.filter(e=>String(e.id)!==String(id));
-    saveE(0);renderAll();renderDash();
+    const sId=String(id);
+    entries=entries.filter(e=>String(e.id)!==sId);
+    if(!deletedIds.includes(sId))deletedIds.push(sId);
+    saveAllState(1,true);renderAll();renderDash();
   };
 
-  function triggerDl(blob,name){
-    const u=URL.createObjectURL(blob),a=document.createElement('a');
-    a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(u),1000);
-  }
   window.exportCSV=function(){
     if(!entries.length){alert('Koi entry nahi hai.');return;}
     const rows=[['Date','Type','UPI ID / Party','Category','Person','Mode','Udhaar','Aaya (INR)','Gaya (INR)','Note'].join(',')];
@@ -1362,29 +1783,27 @@
     });
     triggerDl(new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8;'}),'PrimeLedger_'+todayISO()+'.csv');
   };
-  window.exportJSON=function(){
-    sinceBk=0;localStorage.setItem(K.CNT,'0');checkBackupBanner();
-    triggerDl(new Blob([JSON.stringify({app:'PrimeLedger',budget,openBal,catLimits,categories,persons,presets,entries},null,2)],{type:'application/json'}),'PrimeLedger_Backup_'+todayISO()+'.json');
-  };
+
   window.importJSON=function(){
     const f=$('impFile').files&&$('impFile').files[0];if(!f){alert('.json file select karein.');return;}
     const rd=new FileReader();
     rd.onload=e=>{
       try{
         const p=JSON.parse(e.target.result);if(!p||!Array.isArray(p.entries))throw 0;
-        const res=mergeEntryList(p.entries);
+        const res=mergeEntryList(p.entries,p.deletedIds||[]);
         if(Array.isArray(p.categories))p.categories.forEach(c=>{if(!categories.includes(c))categories.push(c);});
         if(Array.isArray(p.persons))p.persons.forEach(x=>{if(!persons.includes(x))persons.push(x);});
-        saveE(0);saveSettings();fillDD();renderDash();
+        saveAllState(0,true);saveSettings();fillDD();renderDash();
         $('bkMsg').className='msg-ok';$('bkMsg').textContent='Merge Complete: '+res.added+' nayi entries jud gayi ('+res.skipped+' duplicates skip).';
         $('impFile').value='';
       }catch(err){$('bkMsg').className='msg-err';$('bkMsg').textContent='Valid JSON backup file select karein.';}
     };
     rd.readAsText(f);
   };
+
   window.clearAllData=function(){
     if(!confirm('Saara data permanently delete ho jayega. Sure?'))return;
-    entries=[];saveE(0);renderDash();$('bkMsg').className='msg-err';$('bkMsg').textContent='Data clear ho gaya.';
+    entries=[];deletedIds=[];saveAllState(0,false);renderDash();$('bkMsg').className='msg-err';$('bkMsg').textContent='Data clear ho gaya.';
   };
 
   /* ============== EVENT LISTENERS ============== */
@@ -1442,22 +1861,51 @@
     }
 
     const keepMode=entryMode;
-    saveE(eid?0:1);
+    saveAllState(1,true);
     resetForm();
     if(!eid)setEntryMode(keepMode);
+    renderEntryLivePanels();
     $('entryToast').textContent=eid?'Entry Update Ho Gayi!':'Entry Save Ho Gayi!';
     setTimeout(()=>$('entryToast').textContent='',2000);
   });
 
   ['allSearch','allType','allCat','allMode','allFrom','allTo','allSort'].forEach(id=>$(id).addEventListener(id==='allSearch'?'input':'change',renderAll));
 
+  window.addEventListener('online',()=>{if(pairCode)syncNow(true);});
+
   /* ============== INIT APP ============== */
-  load();fillDD();renderPresets();checkBackupBanner();
-  if(appPin)$('pinOverlay').style.display='flex';
-  $('inpDate').value=todayISO();
-  $('sFrom').value=todayISO().slice(0,8)+'01';
-  $('sTo').value=todayISO();
-  renderDash();
+  (async function init(){
+    load();
+    fillDD();
+    renderPresets();
+    updateSyncUI();
+    if(appPin)$('pinOverlay').style.display='flex';
+    $('inpDate').value=todayISO();
+    $('sFrom').value=todayISO().slice(0,8)+'01';
+    $('sTo').value=todayISO();
+    renderDash();
+
+    // Restore linked local backup file handle if previously selected
+    fileHandle=await loadStoredFileHandle();
+    if(fileHandle){
+      try{
+        const perm=await fileHandle.queryPermission({mode:'readwrite'});
+        if(perm==='granted'){
+          $('localFileStatus').textContent='Linked File Active: '+fileHandle.name;
+          $('topBackupPill').textContent='Auto-Backup: Linked';
+        }else{
+          $('resumeBackupBanner').style.display='flex';
+          $('topBackupPill').textContent='Backup: Click Resume';
+        }
+      }catch(e){}
+    }
+    updateBackupBadge();
+
+    if(pairCode){
+      startAutoSyncLoop();
+      syncNow(true);
+    }
+  })();
 })();
 </script>
 </body>
